@@ -4,6 +4,8 @@ SOURCES = $(wildcard task*/*.c)
 COMMON = $(wildcard common/*)
 TARGETS = $(SOURCES:.c=)
 
+.PHONY: clean
+
 all: $(TARGETS)
 
 %: %.c $(COMMON)

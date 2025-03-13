@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
 
-    printf("Communicator size= %d My rank= %d\n", commsize, my_rank);
+    printf("Hello, world!, rank: %d, total executor count: %d\n", my_rank, commsize);
     
     
     MPI_Finalize();
