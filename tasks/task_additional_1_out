@@ -1,0 +1,34 @@
+Sending message of size     1 using MPI_Send  took 0.000056 seconds # Маленькие объёмы данных копируются в буффер, большие - ждут начала приёма
+Sending message of size    10 using MPI_Send  took 0.000016 seconds
+Sending message of size   100 using MPI_Send  took 2.000062 seconds
+Sending message of size  1000 using MPI_Send  took 2.000118 seconds
+Sending message of size 10000 using MPI_Send  took 2.000155 seconds
+
+Sending message of size     1 using MPI_Ssend took 2.000062 seconds # Все ждут начала приёма
+Sending message of size    10 using MPI_Ssend took 2.000092 seconds
+Sending message of size   100 using MPI_Ssend took 2.000147 seconds
+Sending message of size  1000 using MPI_Ssend took 2.000008 seconds
+Sending message of size 10000 using MPI_Ssend took 2.000134 seconds
+
+Sending message of size     1 using MPI_Rsend took 0.000018 seconds # Маленькие объёмы данных копируются, большие - ждут начала приёма
+Sending message of size    10 using MPI_Rsend took 0.000024 seconds
+Sending message of size   100 using MPI_Rsend took 2.000135 seconds
+Sending message of size  1000 using MPI_Rsend took 2.000093 seconds
+Sending message of size 10000 using MPI_Rsend took 2.000194 seconds
+
+Sending message of size     1 using MPI_Bsend took 0.000021 seconds # Данные передаются моментально, падает на больших объёмах
+Sending message of size    10 using MPI_Bsend took 0.000022 seconds # Буфферизует данные, размер сообщения ограничен размером буффера
+Sending message of size   100 using MPI_Bsend took 0.000021 seconds # Размер буффера можно изменять с помощью MPI_Buffer_attach(...)
+Sending message of size  1000 using MPI_Bsend took 0.000029 seconds
+
+# Буффер расширен до 200000000, видно почти линейное увеличение времени копированяия тела сообщения в буффер
+
+Sending message of size         1 using MPI_Bsend took 0.000018 seconds
+Sending message of size        10 using MPI_Bsend took 0.000018 seconds
+Sending message of size       100 using MPI_Bsend took 0.000018 seconds
+Sending message of size      1000 using MPI_Bsend took 0.000027 seconds
+Sending message of size     10000 using MPI_Bsend took 0.000098 seconds
+Sending message of size    100000 using MPI_Bsend took 0.000524 seconds
+Sending message of size   1000000 using MPI_Bsend took 0.005185 seconds
+Sending message of size  10000000 using MPI_Bsend took 0.058121 seconds
+Sending message of size 100000000 using MPI_Bsend took 0.721489 seconds

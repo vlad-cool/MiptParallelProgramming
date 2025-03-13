@@ -1,5 +1,6 @@
 #include <mpi.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 int main(int argc, char *argv[])
 {
@@ -33,14 +34,12 @@ int main(int argc, char *argv[])
 
         sum += (double)1 / (j);
 
-        printf("i = %d\n", j);
+        // printf("i = %d\n", j);
     }
-
-    printf("Hello, world!, rank: %d, total executor count: %d\n", my_rank, commsize);
 
     if (my_rank != 0)
     {
-        MPI_Send(&sum, 1, MPI_2DOUBLE_PRECISION, 0, 0, MPI_COMM_WORLD);
+        MPI_Send(&sum, 1, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
     }
     else
     {
@@ -48,7 +47,7 @@ int main(int argc, char *argv[])
         {
             double buf;
             MPI_Status status;
-            MPI_Recv(&buf, 1, MPI_2DOUBLE_PRECISION, i, 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(&buf, 1, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, &status);
             sum += buf;
         }
         printf("Total sum: %f\n", sum);
