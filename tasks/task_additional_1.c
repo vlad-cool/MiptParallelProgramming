@@ -11,8 +11,8 @@ int main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &commsize);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
-    void *buffer = malloc(sizeof(int) * 200000000);
-    MPI_Buffer_attach(buffer, sizeof(int) * 200000000);
+    // void *buffer = malloc(sizeof(int) * 200000000);
+    // MPI_Buffer_attach(buffer, sizeof(int) * 200000000);
 
     if (argc != 3)
     {
