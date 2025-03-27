@@ -1,9 +1,12 @@
 CXX = mpic++
-CXXFLAGS = -Wall -O2
+CXXFLAGS = -Wall -O3
 
 .PHONY: clean all
 
 all: main
+
+test: test.cpp bigint.h
+	g++ test.cpp -o test
 
 main: main.o
 	$(CXX) main.o -o main

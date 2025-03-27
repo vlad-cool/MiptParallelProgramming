@@ -7,8 +7,8 @@
 
 int main(int argc, char *argv[])
 {
-    long long N = 10000; // Number of summands
-    long long power = 10000; // Number of digits after dot
+    long long N = 100000; // Number of summands
+    long long power = 100; // Number of digits after dot
 
     bigint ten = bigint("10");
     bigint power_bi = bigint(power);
@@ -18,6 +18,8 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &commsize);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+
+    std::cout << commsize << " " << my_rank << std::endl;
 
     MPI_Status status;
 
@@ -39,7 +41,7 @@ int main(int argc, char *argv[])
         res += precision / factorial;
         if (i != 0)
             factorial *= i;
-        // std::cout << i << std::endl;
+        std::cout << i << std::endl;
     }
 
     if (my_rank != 0)
@@ -86,9 +88,7 @@ int main(int argc, char *argv[])
             delete[] buf;
         }
 
-        std::cout << "000  000   0000 0 0 0 00 0 recieved" << std::endl;
-
-        // delete[] buf;
+        std::cout << "recieved" << std::endl;
         
         std::cout << res / precision << "." << res % precision << std::endl;
     }
