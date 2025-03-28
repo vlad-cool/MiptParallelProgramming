@@ -5,7 +5,7 @@
 
 #include <mpi.h>
 
-#include "../../common/bigint.h"
+#include "bigint.h"
 
 // #define DEBUG
 
@@ -39,11 +39,13 @@ int main(int argc, char *argv[])
     }
     long long power = atoi(argv[1]);
 
-    // bigint two = bigint("2");
-    bigint ten = bigint("10");
-    bigint power_bi = bigint(power);
+    // BigInt two = BigInt("2");
+    // BigInt ten = BigInt("10");
+    // BigInt power_bi = BigInt(power);
 
-    bigint precision = big_pow(ten, power_bi);
+    // BigInt precision = big_pow(ten, power_bi);
+
+    BigInt precision = BigInt("1" + std::string(power, '0'));
 
     long long N = backward_striling_formula(power) * 2; // Number of summands
     std::cout << N << std::endl;
@@ -80,18 +82,17 @@ int main(int argc, char *argv[])
     std::cout << my_rank << " " << from << " " << to << std::endl;
 #endif
 
-    // bigint factorial = 1;
-    bigint inverted_factorial = precision;
-    bigint res = 0;
+    // BigInt factorial = 1;
+    BigInt inverted_factorial = precision;
+    BigInt res = 0;
 
-    for (long long i = from; i < to; i++)
+    for (unsigned int i = from; i < to; i++)
     {
-        res += inverted_factorial;
+        res = res + inverted_factorial;
         if (i != 0)
         {
-            inverted_factorial /= bigint(i);
+            inverted_factorial = inverted_factorial / i;
         }
-        std::cout << i << std::endl;
 
 #ifdef DEBUG_2
         std::cout << i << std::endl;
@@ -113,10 +114,10 @@ int main(int argc, char *argv[])
 #ifdef DEBUG
         std::cout << my_rank << " recieved " << std::endl;
 #endif
-        bigint prev_factorial(buf);
+        BigInt prev_factorial(buf);
         delete[] buf;
-        res = res * prev_factorial / precision;
-        inverted_factorial *= prev_factorial / precision;
+        res = (res * prev_factorial).divide_power_10(power);
+        inverted_factorial = inverted_factorial * prev_factorial.divide_power_10(power);
     }
 
 #ifdef DEBUG
@@ -148,7 +149,7 @@ int main(int argc, char *argv[])
 #endif
             char *buf = new char[power + 2];
             MPI_Recv(buf, power + 2, MPI_CHAR, i, 0, MPI_COMM_WORLD, &status);
-            res += bigint(buf);
+            res = res + BigInt(buf);
             delete[] buf;
         }
 
@@ -156,7 +157,7 @@ int main(int argc, char *argv[])
         std::cout << "recieved" << std::endl;
 #endif
 
-        std::cout << res / precision << "." << res % precision << std::endl;
+        std::cout << res << std::endl;
     }
     else
     {

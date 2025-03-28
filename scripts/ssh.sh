@@ -3,4 +3,6 @@
 SCRIPT_DIR=$(realpath $(dirname $0))
 source $SCRIPT_DIR/ssh_info
 
-ssh -p $CLUSTER_SSH_PORT $CLUSTER_SSH_LOGIN@$CLUSTER_ADDRESS
+echo $@
+
+ssh -p $CLUSTER_SSH_PORT $CLUSTER_SSH_LOGIN@$CLUSTER_ADDRESS $@

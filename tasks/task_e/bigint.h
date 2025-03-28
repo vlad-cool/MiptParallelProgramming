@@ -18,6 +18,17 @@ private:
         }
     }
 
+    static unsigned int count_digits(unsigned int n)
+    {
+        unsigned int res = 0;
+        while (n > 0)
+        {
+            res++;
+            n /= 10;
+        }
+        return res;
+    }
+
 public:
     BigInt() {}
     BigInt(unsigned long long n)
@@ -27,6 +38,7 @@ public:
 
     BigInt(const std::string s)
     {
+        // std::cout << "| " << s << " |" << std::endl;
         int n = s.size();
         digits.resize((n + NUMBER_LIMIT_LOG - 1) / NUMBER_LIMIT_LOG);
         std::string str_num = std::string(digits.size() * NUMBER_LIMIT_LOG - n, '0') + s;
@@ -37,6 +49,45 @@ public:
             // std::cout << slice << std::endl;
             digits[i] = std::stoi(slice);
         }
+    }
+
+    BigInt(const unsigned int *buf, size_t size)
+    {
+        digits = std::vector<unsigned int>(buf, buf + size);
+    }
+
+    size_t get_size()
+    {
+        return digits.size();
+    }
+
+    unsigned int *get_data()
+    {
+        return digits.data();
+    }
+
+    BigInt divide_power_10(unsigned int divider) const
+    {
+        BigInt res = *this;
+        if (divider > digits.size() * (NUMBER_LIMIT_LOG - 1) + count_digits(digits.back()))
+        {
+            return BigInt(0);
+        }
+        res.digits.erase(res.digits.begin(), res.digits.begin() + divider / NUMBER_LIMIT_LOG);
+        res.digits.push_back(0);
+        divider %= NUMBER_LIMIT_LOG;
+        unsigned int div_pow = 1;
+        for (int i = 0; i < divider; i++)
+        {
+            div_pow *= 10;
+        }
+        // std::cout << "DivPow " << div_pow << std::endl;
+        for (int i = 0; i < res.digits.size() - 1; i++)
+        {
+            res.digits[i] = res.digits[i] / div_pow + (res.digits[i + 1] % div_pow) * (NUMBER_LIMIT / div_pow);
+        }
+        res.trim();
+        return res;
     }
 
     BigInt operator+(const BigInt &other) const

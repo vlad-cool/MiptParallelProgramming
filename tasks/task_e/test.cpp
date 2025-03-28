@@ -35,4 +35,14 @@ int main()
     std::cout << a % 1203 << std::endl;
     std::cout << a / 564655454 << std::endl;
     std::cout << a % 564655454 << std::endl;
+    
+    std::cout << "ASADASD\n\n";
+    a = BigInt("987654321098765432109876543210987654321098765432109876543210");
+    for (int i = 0; i < 100; i++)
+    {
+        std::cout << a.divide_power_10(i) << std::endl;
+    }
+
+    a = BigInt("1" + std::string(100, '0'));
+    std::cout << a << std::endl;
 }
