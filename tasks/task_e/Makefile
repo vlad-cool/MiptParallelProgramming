@@ -8,11 +8,8 @@ all: main
 test: test.cpp bigint.h
 	g++ test.cpp -o test
 
-main: main.o
-	$(CXX) $(CXXFLAGS) main.o -o main
-
-main.o: task_e.cpp bigint.h
-	$(CXX) $(CXXFLAGS) -c task_e.cpp -o main.o
+main: task_e.cpp bigint.h
+	$(CXX) $(CXXFLAGS) task_e.cpp -o main
 
 clean:
-	rm -f main *o
+	rm -f main
