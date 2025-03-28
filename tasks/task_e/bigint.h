@@ -25,6 +25,20 @@ public:
         digits.push_back(n);
     }
 
+    BigInt(const std::string s)
+    {
+        int n = s.size();
+        digits.resize((n + NUMBER_LIMIT_LOG - 1) / NUMBER_LIMIT_LOG);
+        std::string str_num = std::string(digits.size() * NUMBER_LIMIT_LOG - n, '0') + s;
+        n = str_num.size();
+        for (int i = 0; i < digits.size(); i++)
+        {
+            std::string slice = str_num.substr(n - NUMBER_LIMIT_LOG * (i + 1), NUMBER_LIMIT_LOG);
+            // std::cout << slice << std::endl;
+            digits[i] = std::stoi(slice);
+        }
+    }
+
     BigInt operator+(const BigInt &other) const
     {
         BigInt result;
@@ -132,11 +146,38 @@ public:
         }
     }
 
-    // BigInt operator/(const BigInt &other) const
-    // {
-    //     while 
-    //     std::vector<unsigned int> tmp_vec = other.digits;
-    // }
+    BigInt operator/(unsigned int divider) const
+    {
+        unsigned long long remainder = 0;
+
+        BigInt res;
+        res.digits.resize(digits.size());
+
+        for (int i = digits.size() - 1; i >= 0; i--)
+        {
+            res.digits[i] = (remainder * NUMBER_LIMIT + digits[i]) / divider;
+            remainder = (remainder * NUMBER_LIMIT + digits[i]) % divider;
+        }
+
+        res.trim();
+        return res;
+    }
+
+    unsigned int operator%(unsigned int divider) const
+    {
+        unsigned long long remainder = 0;
+
+        BigInt res;
+        res.digits.resize(digits.size());
+
+        for (int i = digits.size() - 1; i >= 0; i--)
+        {
+            res.digits[i] = ((unsigned long long)remainder * NUMBER_LIMIT + digits[i]) / divider;
+            remainder = ((unsigned long long)remainder * NUMBER_LIMIT + digits[i]) % divider;
+        }
+
+        return remainder;
+    }
 
     friend std::ostream &operator<<(std::ostream &os, const BigInt &obj);
 };
