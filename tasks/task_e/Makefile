@@ -1,5 +1,5 @@
 CXX = mpic++
-CXXFLAGS = -Wall -O3
+CXXFLAGS = -Wall -O2
 
 .PHONY: clean all
 
@@ -9,10 +9,10 @@ test: test.cpp bigint.h
 	g++ test.cpp -o test
 
 main: main.o
-	$(CXX) main.o -o main
+	$(CXX) $(CXXFLAGS) main.o -o main
 
-main.o: task_e.cpp
-	$(CXX) -c task_e.cpp -o main.o
+main.o: task_e.cpp bigint.h
+	$(CXX) $(CXXFLAGS) -c task_e.cpp -o main.o
 
 clean:
 	rm -f main *o

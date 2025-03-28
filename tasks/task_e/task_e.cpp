@@ -13,7 +13,7 @@ int backward_striling_formula(double n)
 {
     double low = 1;
     double high = n;
-    double mid;
+    double mid = n;
 
     while (high - low > 0.0001)
     {
@@ -39,12 +39,6 @@ int main(int argc, char *argv[])
     }
     long long power = atoi(argv[1]);
 
-    // BigInt two = BigInt("2");
-    // BigInt ten = BigInt("10");
-    // BigInt power_bi = BigInt(power);
-
-    // BigInt precision = big_pow(ten, power_bi);
-
     BigInt precision = BigInt("1" + std::string(power, '0'));
 
     long long N = backward_striling_formula(power) * 2; // Number of summands
@@ -61,11 +55,6 @@ int main(int argc, char *argv[])
         std::cout << "Power: " << power << std::endl;
     }
 
-#ifdef DEBUG
-    std::cout << std::setfill('0');
-    std::cout << commsize << " " << my_rank << std::endl;
-#endif
-
     MPI_Status status;
 
     long long from, to;
@@ -78,11 +67,6 @@ int main(int argc, char *argv[])
     else
         to = N / commsize * (my_rank + 1);
 
-#ifdef DEBUG
-    std::cout << my_rank << " " << from << " " << to << std::endl;
-#endif
-
-    // BigInt factorial = 1;
     BigInt inverted_factorial = precision;
     BigInt res = 0;
 
@@ -93,51 +77,43 @@ int main(int argc, char *argv[])
         {
             inverted_factorial = inverted_factorial / i;
         }
-
-#ifdef DEBUG_2
-        std::cout << i << std::endl;
-        std::cout << res / precision << "." << res % precision << std::endl;
-        std::cout << precision / factorial << std::endl;
-#endif
     }
 
     if (my_rank != 0)
     {
 #ifdef DEBUG
-        std::cout << my_rank << " started recieving" << std::endl;
+        std::cout << my_rank << " Started recieving prev factorial" << std::endl;
 #endif
+
         int buf_size;
         MPI_Recv(&buf_size, 1, MPI_INT, my_rank - 1, 0, MPI_COMM_WORLD, &status);
-        char *buf = new char[buf_size];
-        MPI_Recv(buf, buf_size, MPI_CHAR, my_rank - 1, 0, MPI_COMM_WORLD, &status);
+        unsigned int *buf = new unsigned int[buf_size];
+        MPI_Recv(buf, buf_size, MPI_INT, my_rank - 1, 0, MPI_COMM_WORLD, &status);
 
-#ifdef DEBUG
-        std::cout << my_rank << " recieved " << std::endl;
-#endif
-        BigInt prev_factorial(buf);
+        BigInt prev_factorial(buf, buf_size);
         delete[] buf;
         res = (res * prev_factorial).divide_power_10(power);
         inverted_factorial = inverted_factorial * prev_factorial.divide_power_10(power);
-    }
 
 #ifdef DEBUG
-    std::cout << my_rank << " counted " << res / precision << "." << std::setw(power) << res % precision << " inverted factorial " << inverted_factorial / precision << std::setw(power) << inverted_factorial % precision << std::endl;
+        std::cout << my_rank << " Recieved prev factorial" << std::endl;
 #endif
+    }
 
     if (my_rank + 1 != commsize)
     {
-        std::ostringstream oss;
-        oss << inverted_factorial;
-        int buf_size = oss.str().size() + 1;
-        char *buf = new char[buf_size];
-        strcpy(buf, oss.str().c_str());
+#ifdef DEBUG
+        std::cout << my_rank << " Started sending factorial" << std::endl;
+#endif
+
+        int buf_size = inverted_factorial.get_size();
+        MPI_Send(&buf_size, 1, MPI_INT, my_rank + 1, 0, MPI_COMM_WORLD);
+        unsigned int *buf = inverted_factorial.get_data();
+        MPI_Send(buf, buf_size, MPI_INT, my_rank + 1, 0, MPI_COMM_WORLD);
 
 #ifdef DEBUG
-        std::cout << my_rank << " started sending" << std::endl;
+        std::cout << my_rank << " Sent factorial" << std::endl;
 #endif
-        MPI_Send(&buf_size, 1, MPI_INT, my_rank + 1, 0, MPI_COMM_WORLD);
-        MPI_Send(buf, buf_size, MPI_CHAR, my_rank + 1, 0, MPI_COMM_WORLD);
-        delete[] buf;
     }
 
     if (my_rank == 0)
@@ -145,34 +121,38 @@ int main(int argc, char *argv[])
         for (int i = 1; i < commsize; i++)
         {
 #ifdef DEBUG
-            std::cout << "0 started recieveing from " << i << std::endl;
+            std::cout << my_rank << " Started recieving res from " << i << std::endl;
 #endif
-            char *buf = new char[power + 2];
-            MPI_Recv(buf, power + 2, MPI_CHAR, i, 0, MPI_COMM_WORLD, &status);
-            res = res + BigInt(buf);
+
+            int buf_size;
+            MPI_Recv(&buf_size, 1, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+            unsigned int *buf = new unsigned int[buf_size];
+            MPI_Recv(buf, buf_size, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+
+            res = res + BigInt(buf, buf_size);
             delete[] buf;
-        }
 
 #ifdef DEBUG
-        std::cout << "recieved" << std::endl;
+            std::cout << my_rank << " Recieved res from " << i << std::endl;
 #endif
+        }
 
         std::cout << res << std::endl;
     }
     else
     {
-        std::ostringstream oss;
-        oss << res;
-        char *buf = new char[power + 2];
 #ifdef DEBUG
-        std::cout << "size: " << oss.str().size() << std::endl;
+        std::cout << my_rank << " Started sending res" << std::endl;
 #endif
-        strcpy(buf, oss.str().c_str());
+
+        int buf_size = res.get_size();
+        MPI_Send(&buf_size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+        unsigned int *buf = res.get_data();
+        MPI_Send(buf, buf_size, MPI_INT, 0, 0, MPI_COMM_WORLD);
+
 #ifdef DEBUG
-        std::cout << my_rank << " started sending" << std::endl;
+        std::cout << my_rank << " Sent res" << std::endl;
 #endif
-        MPI_Send(buf, power + 2, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
-        delete[] buf;
     }
 
     MPI_Finalize();
