@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <string.h>
 #include <cmath>
 
@@ -6,7 +7,7 @@
 
 #include "../../common/bigint.h"
 
-// #define DEBUG_2
+// #define DEBUG
 
 int backward_striling_formula(double n)
 {
@@ -59,6 +60,7 @@ int main(int argc, char *argv[])
     }
 
 #ifdef DEBUG
+    std::cout << std::setfill('0');
     std::cout << commsize << " " << my_rank << std::endl;
 #endif
 
@@ -78,17 +80,18 @@ int main(int argc, char *argv[])
     std::cout << my_rank << " " << from << " " << to << std::endl;
 #endif
 
-    bigint factorial = 1;
+    // bigint factorial = 1;
+    bigint inverted_factorial = precision;
     bigint res = 0;
 
     for (long long i = from; i < to; i++)
     {
-        res += precision / factorial;
+        res += inverted_factorial;
         if (i != 0)
-            factorial *= i;
-#ifdef DEBUG
+        {
+            inverted_factorial /= bigint(i);
+        }
         std::cout << i << std::endl;
-#endif
 
 #ifdef DEBUG_2
         std::cout << i << std::endl;
@@ -112,18 +115,18 @@ int main(int argc, char *argv[])
 #endif
         bigint prev_factorial(buf);
         delete[] buf;
-        res = res / prev_factorial;
-        factorial *= prev_factorial;
+        res = res * prev_factorial / precision;
+        inverted_factorial *= prev_factorial / precision;
     }
 
 #ifdef DEBUG
-    std::cout << my_rank << " counted " << res / precision << "." << res % precision << " factorial " << factorial << std::endl;
+    std::cout << my_rank << " counted " << res / precision << "." << std::setw(power) << res % precision << " inverted factorial " << inverted_factorial / precision << std::setw(power) << inverted_factorial % precision << std::endl;
 #endif
 
     if (my_rank + 1 != commsize)
     {
         std::ostringstream oss;
-        oss << factorial;
+        oss << inverted_factorial;
         int buf_size = oss.str().size() + 1;
         char *buf = new char[buf_size];
         strcpy(buf, oss.str().c_str());
