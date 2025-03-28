@@ -1,5 +1,5 @@
 CXX = mpic++
-CXXFLAGS = -Wall -O2
+CXXFLAGS = -O2
 
 .PHONY: clean all
 

@@ -68,6 +68,14 @@ public:
 
     BigInt divide_power_10(unsigned int divider) const
     {
+        if (digits.size() == 0)
+        {
+            return BigInt(0);
+        }
+        if (digits.size() == 1 && digits[0] == 0)
+        {
+            return BigInt(0);
+        }
         BigInt res = *this;
         if (divider > digits.size() * (NUMBER_LIMIT_LOG - 1) + count_digits(digits.back()))
         {

@@ -42,7 +42,6 @@ int main(int argc, char *argv[])
     BigInt precision = BigInt("1" + std::string(power, '0'));
 
     long long N = backward_striling_formula(power) * 2; // Number of summands
-    std::cout << N << std::endl;
 
     int commsize, my_rank;
     MPI_Init(&argc, &argv);
@@ -90,11 +89,15 @@ int main(int argc, char *argv[])
         unsigned int *buf = new unsigned int[buf_size];
         MPI_Recv(buf, buf_size, MPI_INT, my_rank - 1, 0, MPI_COMM_WORLD, &status);
 
+#ifdef DEBUG
+        std::cout << my_rank << " Recieved buf with pref factorial" << std::endl;
+#endif
+
         BigInt prev_factorial(buf, buf_size);
         delete[] buf;
         res = (res * prev_factorial).divide_power_10(power);
         inverted_factorial = inverted_factorial * prev_factorial.divide_power_10(power);
-
+        
 #ifdef DEBUG
         std::cout << my_rank << " Recieved prev factorial" << std::endl;
 #endif
