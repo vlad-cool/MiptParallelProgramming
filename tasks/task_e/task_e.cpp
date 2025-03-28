@@ -7,7 +7,7 @@
 
 #include "bigint.h"
 
-// #define DEBUG
+// #define DEBUG_1
 
 int backward_striling_formula(double n)
 {
@@ -96,8 +96,8 @@ int main(int argc, char *argv[])
         BigInt prev_factorial(buf, buf_size);
         delete[] buf;
         res = (res * prev_factorial).divide_power_10(power);
-        inverted_factorial = inverted_factorial * prev_factorial.divide_power_10(power);
-        
+        inverted_factorial = (inverted_factorial * prev_factorial).divide_power_10(power);
+
 #ifdef DEBUG
         std::cout << my_rank << " Recieved prev factorial" << std::endl;
 #endif
@@ -107,6 +107,9 @@ int main(int argc, char *argv[])
     {
 #ifdef DEBUG
         std::cout << my_rank << " Started sending factorial" << std::endl;
+#endif
+#ifdef DEBUG_1
+        std::cout << inverted_factorial << std::endl;
 #endif
 
         int buf_size = inverted_factorial.get_size();
