@@ -7,25 +7,7 @@
 
 #include "bigint.h"
 
-int backward_striling_formula(double n)
-{
-    double low = 1;
-    double high = n;
-    double mid = n;
-
-    while (high - low > 0.0001)
-    {
-        mid = (low + high) / 2;
-        double value = mid * std::log10(mid);
-
-        if (value < n)
-            low = mid;
-        else
-            high = mid;
-    }
-
-    return (int)mid;
-}
+#define EXTRA_DGITS 10
 
 int main(int argc, char *argv[])
 {
@@ -35,11 +17,11 @@ int main(int argc, char *argv[])
         std::cout << "No digits number provided" << std::endl;
         return 1;
     }
-    long long power = atoi(argv[1]);
+    long long power = atoi(argv[1]) + EXTRA_DGITS;
 
     BigInt precision = BigInt("1" + std::string(power, '0'));
 
-    long long N = backward_striling_formula(power) * 5 / 2; // Number of summands
+    long long N = power; // Number of summands
 
     int commsize, my_rank;
     MPI_Init(&argc, &argv);
@@ -96,7 +78,7 @@ int main(int argc, char *argv[])
 
     if (my_rank == 0)
     {
-        std::cout << res << std::endl;
+        std::cout << res.divide_power_10(EXTRA_DGITS) << std::endl;
     }
     
     MPI_Finalize();
