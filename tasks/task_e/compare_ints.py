@@ -1,8 +1,11 @@
-#!/bin/python3
+#!env python3
+import sys
 
 i = 0
 
-with open("e_mine", "r") as a:
+first = sys.argv[1] or "e_mine"
+
+with open(first, "r") as a:
     with open("e_nasa", "r") as b:
         c = True
         d = True

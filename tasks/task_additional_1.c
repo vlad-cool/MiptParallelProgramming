@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
         printf("Sending message of size %5d using ", buf_size);
 
-        clock_gettime(CLOCK_BOOTTIME, &t_start);
+        clock_gettime(CLOCK_MONOTONIC, &t_start);
 
         switch (send_type)
         {
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
             MPI_Bsend(buf, buf_size, MPI_INT, 1, 0, MPI_COMM_WORLD);
             break;
         }
-        clock_gettime(CLOCK_BOOTTIME, &t_end);
+        clock_gettime(CLOCK_MONOTONIC, &t_end);
 
         printf(" took %f seconds\n", (t_end.tv_sec - t_start.tv_sec) + (double)(t_end.tv_nsec - t_start.tv_nsec) / 1000000000);
     }
