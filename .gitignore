@@ -2,3 +2,9 @@ scripts/ssh_info
 .vscode/settings.json
 tasks/task_e/test
 tasks/task_e/main
+tasks/task_1_1
+tasks/task_1_2
+tasks/task_1_3
+tasks/task_additional_1
+tasks/*SYM
+tasks/task_e/*SYM
