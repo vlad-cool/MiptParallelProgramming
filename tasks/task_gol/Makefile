@@ -5,7 +5,7 @@ CXXFLAGS = -O3
 
 all: bin/main
 
-bin/main: bin/main.o bin/gol_single.o bin/gol_shared.o bin/gol_mpi.o
+bin/main: bin/main.o bin/gol_single.o bin/gol_shared.o bin/gol_mpi.o bin/gol_hybrid.o
 	$(CXX) $(CXXFLAGS) $^ -o bin/main
 
 bin/main.o: main.cpp
@@ -19,6 +19,9 @@ bin/gol_shared.o: gol_shared.cpp gol_shared.h
 
 bin/gol_mpi.o: gol_mpi.cpp gol_mpi.h
 	$(CXX) $(CXXFLAGS) -c gol_mpi.cpp -o bin/gol_mpi.o
+
+bin/gol_hybrid.o: gol_hybrid.cpp gol_hybrid.h
+	$(CXX) $(CXXFLAGS) -c gol_hybrid.cpp -o bin/gol_hybrid.o
 
 clean:
 	rm -f bin/*

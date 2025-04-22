@@ -4,6 +4,7 @@
 #include "gol_single.h"
 #include "gol_shared.h"
 #include "gol_mpi.h"
+#include "gol_hybrid.h"
 
 int main(int argc, char *argv[])
 {
@@ -16,7 +17,8 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &commsize);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-    GameOfLifeMpi gol(width, height, commsize, my_rank);
+    // GameOfLifeMpi gol(width, height, commsize, my_rank);
+    GameOfLifeHybrid gol(width, height, commsize, my_rank, 2);
 
     // gol.set_cell(3, 3, true);
     // gol.set_cell(2, 4, true);

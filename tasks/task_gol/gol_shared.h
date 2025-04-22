@@ -1,5 +1,5 @@
-#ifndef GOL_H_PTHREAD
-#define GOL_H_PTHREAD
+#ifndef GOL_SHARED_H
+#define GOL_SHARED_H
 
 #include <cstdint>
 #include <cstddef>
