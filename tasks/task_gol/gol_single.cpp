@@ -41,7 +41,7 @@ void GameOfLife::fill_random(uint32_t percentage)
 
 void GameOfLife::set_cell(size_t x, size_t y, bool val)
 {
-    field[x][y] = val;
+    field[y][x] = val;
 }
 
 void GameOfLife::step(uint32_t steps)
