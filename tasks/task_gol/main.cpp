@@ -7,20 +7,22 @@
 
 int main(int argc, char *argv[])
 {
-    // GameOfLife gol(151, 14);
-    // GameOfLifeShared gol(151, 14, 3);
+    size_t width = 150;
+    size_t height = 15;
+    // GameOfLife gol(width, height);
+    // GameOfLifeShared gol(width, height, 3);
 
     int commsize, my_rank;
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &commsize);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-    GameOfLifeMpi gol(151, 14, commsize, my_rank);
+    GameOfLifeMpi gol(width, height, commsize, my_rank);
 
-    gol.set_cell(3, 3, true);
-    gol.set_cell(2, 4, true);
-    gol.set_cell(2, 5, true);
-    gol.set_cell(3, 5, true);
-    gol.set_cell(4, 5, true);
+    // gol.set_cell(3, 3, true);
+    // gol.set_cell(2, 4, true);
+    // gol.set_cell(2, 5, true);
+    // gol.set_cell(3, 5, true);
+    // gol.set_cell(4, 5, true);
 
     gol.set_cell(42 + 0, 0, true);
     gol.set_cell(42 + 1, 1, true);
@@ -38,6 +40,21 @@ int main(int argc, char *argv[])
     gol.set_cell(42 + 13, 13, true);
 
     // gol.fill_random(33);
+
+    std::random_device rd;
+    // std::mt19937 gen(rd());
+    std::mt19937 gen(179);
+    std::uniform_int_distribution<> distrib(0, 99);
+    int random_num = distrib(gen);
+    for (size_t y = 0; y < height; y++)
+    {
+        for (size_t x = 0; x < width; x++)
+        {
+            gol.set_cell(x, y, distrib(gen) < 33);
+        }
+    }
+
+    // gol.print();
 
     while (1)
     {

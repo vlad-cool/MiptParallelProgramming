@@ -64,7 +64,7 @@ void GameOfLifeMpi::set_cell(size_t x, size_t y, bool val)
     }
     if (prev_sum <= y && prev_sum + get_worker_height(total_height, commsize, my_rank) > y)
     {
-        field[y - prev_sum][x] = val;
+        field[y - prev_sum + 1][x] = val;
     }
     sync();
 }
