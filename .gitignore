@@ -8,3 +8,6 @@ tasks/task_1_3
 tasks/task_additional_1
 tasks/*SYM
 tasks/task_e/*SYM
+tasks/task_sort/*SYM
+tasks/task_sort/main
+tasks/task_gol/bin/

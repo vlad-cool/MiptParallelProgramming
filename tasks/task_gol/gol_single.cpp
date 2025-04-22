@@ -1,4 +1,4 @@
-#include "gol.h"
+#include "gol_single.h"
 
 uint8_t GameOfLife::count_neighbours(size_t x, size_t y)
 {

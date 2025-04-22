@@ -9,7 +9,7 @@
 #include <thread>
 #include <atomic>
 
-#include "gol.h"
+#include "gol_single.h"
 
 class GameOfLifeShared : public GameOfLife
 {
