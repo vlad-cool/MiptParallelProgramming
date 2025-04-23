@@ -1,5 +1,7 @@
 #include <chrono>
 #include <thread>
+#include <sstream>
+#include <functional>
 
 #include "gol_single.h"
 #include "gol_shared.h"
@@ -10,12 +12,12 @@ int main(int argc, char *argv[])
 {
     size_t width = 150;
     size_t height = 15;
-    
+
     int commsize, my_rank;
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &commsize);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-    
+
     // GameOfLife gol(width, height);
     // GameOfLifeShared gol(width, height, 3);
     // GameOfLifeMpi gol(width, height, commsize, my_rank);
@@ -53,22 +55,38 @@ int main(int argc, char *argv[])
     {
         for (size_t x = 0; x < width; x++)
         {
-            // gol.set_cell(x, y, distrib(gen) < 33);
+            gol.set_cell(x, y, distrib(gen) < 33);
         }
+    }
+
+    gol.step(10);
+    std::ostringstream oss;
+    std::hash<std::string> hasher;
+    oss << gol;
+    if (my_rank == 0)
+    {
+        std::string result = oss.str();
+        std::cout << "Output hash: " << hasher(result) << std::endl;
+    }
+
+    std::cout << gol;
+    if (my_rank == 0)
+    {
+        std::cout << std::endl;
     }
 
     // gol.print();
 
-    while (1)
-    {
-        std::cout << gol;
-        if (my_rank == 0)
-        {
-            std::cout << std::endl;
-        }
-        gol.step();
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
+    // while (1)
+    // {
+    //     std::cout << gol;
+    //     if (my_rank == 0)
+    //     {
+    //         std::cout << std::endl;
+    //     }
+    //     gol.step();
+    //     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    // }
 
     MPI_Finalize();
 }

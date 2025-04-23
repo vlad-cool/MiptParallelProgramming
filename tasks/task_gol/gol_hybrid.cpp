@@ -1,6 +1,6 @@
 #include "gol_hybrid.h"
 
-GameOfLifeHybrid::GameOfLifeHybrid(size_t width, size_t height, int commsize, int my_rank, size_t threads_per_process) : GameOfLife(width, height), GameOfLifeMpi(width, height, commsize, my_rank), GameOfLifeShared(width, height, threads_per_process)
+GameOfLifeHybrid::GameOfLifeHybrid(size_t width, size_t height, int commsize, int my_rank, size_t threads_per_process) : GameOfLife(width, get_worker_height(height, commsize, my_rank) + 2), GameOfLifeMpi(width, height, commsize, my_rank), GameOfLifeShared(width, get_worker_height(height, commsize, my_rank) + 2, threads_per_process)
 {
 }
 
