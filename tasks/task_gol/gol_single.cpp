@@ -67,15 +67,20 @@ void GameOfLife::step(uint32_t steps)
     }
 }
 
-void GameOfLife::print() const
+void GameOfLife::print(std::ostream &os) const
 {
     for (size_t y = 0; y < height; y++)
     {
         for (size_t x = 0; x < width; x++)
         {
-            std::cout << (field[y][x] ? '#' : '.');
+            os << (field[y][x] ? '#' : '.');
         }
-        std::cout << "\n";
+        os << "\n";
     }
-    std::cout << std::endl;
+    os << std::endl;
+}
+
+std::ostream& operator<<(std::ostream& os, const GameOfLife& b) {
+    b.print(os);
+    return os;
 }

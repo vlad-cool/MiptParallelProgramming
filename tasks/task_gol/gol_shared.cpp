@@ -65,3 +65,8 @@ void GameOfLifeShared::step(uint32_t steps)
         std::swap(field, next_field);
     }
 }
+
+std::ostream& operator<<(std::ostream& os, const GameOfLifeShared& b) {
+    b.print(os);
+    return os;
+}

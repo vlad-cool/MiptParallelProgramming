@@ -11,7 +11,7 @@
 
 #include "gol_single.h"
 
-class GameOfLifeShared : public GameOfLife
+class GameOfLifeShared : virtual public GameOfLife
 {
 protected:
     std::vector<std::thread> threads;
@@ -22,7 +22,8 @@ protected:
 public:
     GameOfLifeShared(size_t width, size_t height, size_t threads_number);
     ~GameOfLifeShared();
-    void step(uint32_t steps = 1) override;
+    virtual void step(uint32_t steps = 1) override;
+    friend std::ostream &operator<<(std::ostream &os, const GameOfLifeShared &b);
 };
 
 #endif

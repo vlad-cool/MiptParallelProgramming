@@ -39,6 +39,10 @@ void GameOfLifeMpi::recv(size_t line, int source)
 
 void GameOfLifeMpi::sync()
 {
+    if (commsize == 1)
+    {
+        return;
+    }
     if (my_rank % 2 == 0)
     {
         send(1, (my_rank - 1 + commsize) % commsize);
@@ -83,8 +87,7 @@ void GameOfLifeMpi::fill_random(uint32_t percentage)
     GameOfLife::fill_random(percentage);
     sync();
 }
-
-void GameOfLifeMpi::print() const
+void GameOfLifeMpi::print(std::ostream &os) const
 {
     if (my_rank == 0)
     {
@@ -92,9 +95,9 @@ void GameOfLifeMpi::print() const
         {
             for (size_t x = 0; x < width; x++)
             {
-                std::cout << (field[y][x] ? '#' : '.');
+                os << (field[y][x] ? '#' : '.');
             }
-            std::cout << "\n";
+            os << "\n";
         }
 
         for (int i = 1; i < commsize; i++)
@@ -105,12 +108,11 @@ void GameOfLifeMpi::print() const
                 MPI_Recv(buf, width, MPI_CHAR, i, 0, MPI_COMM_WORLD, &status);
                 for (size_t x = 0; x < width; x++)
                 {
-                    std::cout << (buf[x] ? '#' : '.');
+                    os << (buf[x] ? '#' : '.');
                 }
-                std::cout << "\n";
+                os << "\n";
             }
         }
-        std::cout << std::endl;
     }
     else
     {
@@ -119,4 +121,10 @@ void GameOfLifeMpi::print() const
             send(y, 0);
         }
     }
+}
+
+std::ostream &operator<<(std::ostream &os, const GameOfLifeMpi &b)
+{
+    b.print(os);
+    return os;
 }

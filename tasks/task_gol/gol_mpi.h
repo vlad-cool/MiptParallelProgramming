@@ -5,7 +5,7 @@
 
 #include "gol_single.h"
 
-class GameOfLifeMpi : public GameOfLife
+class GameOfLifeMpi : virtual public GameOfLife
 {
 protected:
     size_t total_height;
@@ -16,14 +16,15 @@ protected:
     void recv(size_t line, int source);
     void sync();
     static int get_worker_height(size_t height, int commsize, int rank);
-
-public:
+    
+    public:
     GameOfLifeMpi(size_t width, size_t height, int commsize, int my_rank);
     ~GameOfLifeMpi();
     virtual void set_cell(size_t x, size_t y, bool val) override;
-    void step(uint32_t steps = 1) override;
-    void print() const override;
-    void fill_random(uint32_t percentage) override;
+    virtual void step(uint32_t steps = 1) override;
+    virtual void fill_random(uint32_t percentage) override;
+    virtual void print(std::ostream &os) const override;
+    friend std::ostream &operator<<(std::ostream &os, const GameOfLifeMpi &b);
 };
 
 #endif
