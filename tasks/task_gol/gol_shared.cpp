@@ -38,9 +38,6 @@ GameOfLifeShared::GameOfLifeShared(size_t width, size_t height, size_t threads_n
         threads.push_back(
             std::thread([from, step, i, this]()
                         { this->partial_step(from, from + step, i); }));
-
-        std::cout
-            << height << " " << from << " " << from + step << std::endl;
         from += step;
     }
 }
