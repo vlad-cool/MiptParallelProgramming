@@ -7,7 +7,7 @@
 class GameOfLifeHybrid : public GameOfLifeShared, public GameOfLifeMpi
 {
 public:
-    GameOfLifeHybrid(size_t width, size_t height, int commsize, int my_rank, size_t threads_per_process);
+    GameOfLifeHybrid(size_t width, size_t height, int commsize, int my_rank, bool optimize_send, size_t threads_per_process);
     virtual void step(uint32_t steps = 1) override;
     friend std::ostream &operator<<(std::ostream &os, const GameOfLifeHybrid &b);
 };

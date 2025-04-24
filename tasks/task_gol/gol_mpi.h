@@ -12,14 +12,17 @@ protected:
     int commsize;
     int my_rank;
     mutable uint8_t *buf;
-    void send(const std::vector<bool> &line, int destination) const;
-    void recv(std::vector<bool> &line, int source) const;
+    void send_unopt(const std::vector<bool> &line, int destination) const;
+    void recv_unopt(std::vector<bool> &line, int source) const;
+    void send(const std::vector<bool> &line, std::vector<bool> &next_line, int destination) const;
+    void recv(std::vector<bool> &line, std::vector<bool> &next_line, int source) const;
     void sync();
     static int get_worker_height(size_t height, int commsize, int rank);
     mutable std::vector<bool> line;
+    bool optimize_send;
 
 public:
-    GameOfLifeMpi(size_t width, size_t height, int commsize, int my_rank);
+    GameOfLifeMpi(size_t width, size_t height, int commsize, int my_rank, bool optimize_send);
     ~GameOfLifeMpi();
     virtual void set_cell(size_t x, size_t y, bool val) override;
     virtual void step(uint32_t steps = 1) override;

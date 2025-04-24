@@ -1,7 +1,9 @@
 #include "gol_mpi.h"
 
-GameOfLifeMpi::GameOfLifeMpi(size_t width, size_t height, int commsize, int my_rank) : GameOfLife(width, get_worker_height(height, commsize, my_rank) + 2)
+GameOfLifeMpi::GameOfLifeMpi(size_t width, size_t height, int commsize, int my_rank, bool optimize_send) : GameOfLife(width, get_worker_height(height, commsize, my_rank) + 2)
 {
+    optimize_send = optimize_send && (width < (1 << sizeof(uint16_t)));
+    this->optimize_send = optimize_send;
     total_height = height;
     this->commsize = commsize;
     this->my_rank = my_rank;
@@ -19,7 +21,8 @@ GameOfLifeMpi::~GameOfLifeMpi()
     delete[] buf;
 }
 
-void GameOfLifeMpi::send(const std::vector<bool> &line, int destination) const
+
+void GameOfLifeMpi::send_unopt(const std::vector<bool> &line, int destination) const
 {
     for (int i = 0; i < width / sizeof(uint8_t) + 1; i++)
     {
@@ -32,13 +35,71 @@ void GameOfLifeMpi::send(const std::vector<bool> &line, int destination) const
     MPI_Send(buf, width / sizeof(uint8_t) + 1, MPI_CHAR, destination, 0, MPI_COMM_WORLD);
 }
 
-void GameOfLifeMpi::recv(std::vector<bool> &line, int source) const
+void GameOfLifeMpi::recv_unopt(std::vector<bool> &line, int source) const
 {
     MPI_Status status;
     MPI_Recv(buf, width / sizeof(uint8_t) + 1, MPI_CHAR, source, 0, MPI_COMM_WORLD, &status);
     for (int i = 0; i < width; i++)
     {
         line[i] = buf[i / sizeof(uint8_t)] >> (i % sizeof(uint8_t)) & 1;
+    }
+}
+
+void GameOfLifeMpi::send(const std::vector<bool> &line, std::vector<bool> &next_line, int destination) const
+{
+    bool optimize = false;
+    int32_t change_count = 0;
+    if (optimize_send)
+    {
+        for (int i = 0; i < width; i++)
+        {
+            change_count += field[i] != next_field[i];
+        }
+        optimize = (change_count * sizeof(uint16_t) < width - 2);
+        if (!optimize)
+        {
+            change_count = -1;
+        }
+        MPI_Send(&change_count, 1, MPI_INT, destination, 0, MPI_COMM_WORLD);
+    }
+    if (optimize)
+    {
+        uint16_t *optimized_buf = (uint16_t *)(buf);
+        size_t j = 0;
+        for (size_t i = 0; i < width; i++)
+        {
+            if (line[i] != next_line[i])
+            {
+                optimized_buf[j] = i;
+                i++;
+            }
+        }
+        MPI_Send(buf, change_count, MPI_SHORT, destination, 0, MPI_COMM_WORLD);
+    }
+    else
+    {
+        send_unopt(line, destination);
+    }
+}
+
+void GameOfLifeMpi::recv(std::vector<bool> &line, std::vector<bool> &next_line, int source) const
+{
+    int32_t change_count;
+
+    MPI_Status status;
+    MPI_Recv(&change_count, 1, MPI_INT, source, 0, MPI_COMM_WORLD, &status);
+    if (change_count == -1)
+    {
+        recv_unopt(line, source);
+    }
+    else
+    {
+        uint16_t *optimized_buf = (uint16_t *)(buf);
+        MPI_Recv(optimized_buf, change_count, MPI_SHORT, source, 0, MPI_COMM_WORLD, &status);
+        for (int i = 0; i < change_count; i++)
+        {
+            line[optimized_buf[i]] = !next_line[optimized_buf[i]];
+        }
     }
 }
 
@@ -50,17 +111,17 @@ void GameOfLifeMpi::sync()
     }
     if (my_rank % 2 == 0)
     {
-        send(field[1], (my_rank - 1 + commsize) % commsize);
-        send(field[height - 2], (my_rank + 1 + commsize) % commsize);
-        recv(field[height - 1], (my_rank + 1 + commsize) % commsize);
-        recv(field[0], (my_rank - 1 + commsize) % commsize);
+        send(field[1], next_field[1], (my_rank - 1 + commsize) % commsize);
+        send(field[height - 2], next_field[height - 2], (my_rank + 1 + commsize) % commsize);
+        recv(field[height - 1], field[height - 1], (my_rank + 1 + commsize) % commsize);
+        recv(field[0], field[0], (my_rank - 1 + commsize) % commsize);
     }
     else
     {
-        recv(field[height - 1], (my_rank + 1 + commsize) % commsize);
-        recv(field[0], (my_rank - 1 + commsize) % commsize);
-        send(field[1], (my_rank - 1 + commsize) % commsize);
-        send(field[height - 2], (my_rank + 1 + commsize) % commsize);
+        recv(field[height - 1], field[height - 1], (my_rank + 1 + commsize) % commsize);
+        recv(field[0], field[0], (my_rank - 1 + commsize) % commsize);
+        send(field[1], field[1], (my_rank - 1 + commsize) % commsize);
+        send(field[height - 2], field[height - 2], (my_rank + 1 + commsize) % commsize);
     }
 }
 
@@ -110,7 +171,7 @@ void GameOfLifeMpi::print(std::ostream &os) const
         {
             for (size_t y = 0; y < get_worker_height(total_height, commsize, i); y++)
             {
-                recv(line, i);
+                recv_unopt(line, i);
                 for (size_t x = 0; x < width; x++)
                 {
                     os << (line[x] ? '#' : '.');
@@ -123,7 +184,7 @@ void GameOfLifeMpi::print(std::ostream &os) const
     {
         for (size_t y = 1; y < height - 1; y++)
         {
-            send(field[y], 0);
+            send_unopt(field[y], 0);
         }
     }
 }

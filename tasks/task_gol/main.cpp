@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
                 {
                     std::cout << "Running " << commsize << " mpi processes\n";
                 }
-                gol = new GameOfLifeMpi(width, height, commsize, my_rank);
+                gol = new GameOfLifeMpi(width, height, commsize, my_rank, optimize_mpi);
             }
             if (mode == "hybrid")
             {
@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
                 {
                     std::cout << "Running " << commsize << " mpi processes, each" << number_of_threads << " threads\n";
                 }
-                gol = new GameOfLifeHybrid(width, height, commsize, my_rank, number_of_threads);
+                gol = new GameOfLifeHybrid(width, height, commsize, my_rank, optimize_mpi, number_of_threads);
             }
             break;
         }
