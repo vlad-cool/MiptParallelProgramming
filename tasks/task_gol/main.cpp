@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     -H (print hash)
     -f (print field)
     -t (print calculation time)
-    -i (print launch info) // TODO
+    -i (print launch info)
     -d DELAY (in milliseconds, make sense with -a -f options to make good animation)
     -r SEED (seed for random, default random_device())
     -P PERCENT (percentage for random fill)
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
             std::cout << "-H (print hash)\n";
             std::cout << "-f (print field)\n";
             std::cout << "-t (print calculation time)\n";
-            std::cout << "-i (print launch info) // TODO\n";
+            std::cout << "-i (print launch info)\n";
             std::cout << "-d DELAY (in milliseconds, make sense with -a -f options to make good animation)\n";
             std::cout << "-r SEED (seed for random, default random_device())\n";
             std::cout << "-P PERCENT (percentage for random fill)";
@@ -209,6 +209,10 @@ int main(int argc, char *argv[])
                     MPI_Finalize();
                     return 0;
                 }
+                if (print_launch_info)
+                {
+                    std::cout << "Running single threaded\n";
+                }
                 gol = new GameOfLife(width, height);
             }
             if (mode == "shared")
@@ -218,14 +222,27 @@ int main(int argc, char *argv[])
                     MPI_Finalize();
                     return 0;
                 }
+                if (print_launch_info)
+                {
+                    std::cout << "Running " << number_of_threads << " threads\n";
+                }
                 gol = new GameOfLifeShared(width, height, number_of_threads);
             }
             if (mode == "mpi")
             {
+                if (print_launch_info)
+                {
+                    std::cout << "Running " << commsize << " mpi processes\n";
+                }
                 gol = new GameOfLifeMpi(width, height, commsize, my_rank);
             }
             if (mode == "hybrid")
             {
+
+                if (print_launch_info)
+                {
+                    std::cout << "Running " << commsize << " mpi processes, each" << number_of_threads << " threads\n";
+                }
                 gol = new GameOfLifeHybrid(width, height, commsize, my_rank, number_of_threads);
             }
             break;
@@ -238,7 +255,21 @@ int main(int argc, char *argv[])
             MPI_Finalize();
             return 0;
         }
+        if (print_launch_info)
+        {
+            std::cout << "Running single threaded\n";
+        }
         gol = new GameOfLife(width, height);
+    }
+
+    if (print_launch_info)
+    {
+        std::cout << std::boolalpha;
+        std::cout << "Field: " << width << "x" << height << ", steps: " << steps << "\n";
+        std::cout << "Send optimization " << optimize_mpi << "\n";
+        std::cout << "Random seed: " << seed << "\n";
+        std::cout << "Start field density" << percentage << "%";
+        std::cout << std::endl;
     }
 
     std::mt19937 gen(seed);
@@ -263,7 +294,7 @@ int main(int argc, char *argv[])
 
         if (my_rank == 0)
         {
-            std::cout << "step #" << i + 1 << " of " << steps << "\n";
+            std::cerr << "step #" << i + 1 << " of " << steps << std::endl;
         }
 
         if (print_every_step || i + 1 == steps)
@@ -284,14 +315,14 @@ int main(int argc, char *argv[])
                 }
             }
         }
-        
+
         if (my_rank == 0)
         {
             std::cout << std::endl;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(delay));
     }
-    
+
     if (print_calc_time)
     {
         std::cout << "Calculation time: " << duration.count() / 1000000 << "." << std::setfill('0') << std::setw(6) << duration.count() % 1000000 << " seconds" << std::endl;
