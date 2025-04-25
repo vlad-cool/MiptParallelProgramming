@@ -21,7 +21,6 @@ GameOfLifeMpi::~GameOfLifeMpi()
     delete[] buf;
 }
 
-
 void GameOfLifeMpi::send_unopt(const std::vector<bool> &line, int destination) const
 {
     for (int i = 0; i < width / sizeof(uint8_t) + 1; i++)
@@ -84,10 +83,13 @@ void GameOfLifeMpi::send(const std::vector<bool> &line, std::vector<bool> &next_
 
 void GameOfLifeMpi::recv(std::vector<bool> &line, std::vector<bool> &next_line, int source) const
 {
-    int32_t change_count;
+    int32_t change_count = -1;
 
     MPI_Status status;
-    MPI_Recv(&change_count, 1, MPI_INT, source, 0, MPI_COMM_WORLD, &status);
+    if (optimize_send)
+    {
+        MPI_Recv(&change_count, 1, MPI_INT, source, 0, MPI_COMM_WORLD, &status);
+    }
     if (change_count == -1)
     {
         recv_unopt(line, source);
@@ -107,6 +109,8 @@ void GameOfLifeMpi::sync()
 {
     if (commsize == 1)
     {
+        std::copy(field[height - 2].begin(), field[height - 2].end(), field[0].begin());
+        std::copy(field[1].begin(), field[1].end(), field[height - 1].begin());
         return;
     }
     if (my_rank % 2 == 0)
@@ -136,7 +140,7 @@ void GameOfLifeMpi::set_cell(size_t x, size_t y, bool val)
     {
         field[y - prev_sum + 1][x] = val;
     }
-    sync();
+    // sync();
 }
 
 void GameOfLifeMpi::step(uint32_t steps)
@@ -151,7 +155,10 @@ void GameOfLifeMpi::step(uint32_t steps)
 void GameOfLifeMpi::fill_random(uint32_t percentage)
 {
     GameOfLife::fill_random(percentage);
+    bool opt = optimize_send;
+    optimize_send = false;
     sync();
+    optimize_send = opt;
 }
 
 void GameOfLifeMpi::print(std::ostream &os) const

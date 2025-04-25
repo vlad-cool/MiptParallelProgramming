@@ -1,5 +1,5 @@
 CXX = mpic++
-CXXFLAGS = -O3
+CXXFLAGS = -O3 -std=c++20
 
 .PHONY: clean all
 

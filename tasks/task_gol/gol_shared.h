@@ -15,7 +15,7 @@ class GameOfLifeShared : virtual public GameOfLife
 {
 protected:
     std::vector<std::thread> threads;
-    std::atomic<uint32_t> thread_counter;
+    std::atomic<bool> *thread_running;
     std::atomic<bool> running;
     void partial_step(size_t from, size_t to, size_t id);
 

@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     -s STEPS
     -m {SINGLE, SHARED, MPI, HYBRID}
     -p {NUMBER_OF_THREADS} (for shared and hybrid (per mpi process))
-    -o (optimize mpi send) // TODO
+    -o (optimize mpi send)
     -a (print all steps)
     -H (print hash)
     -f (print field)
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     uint32_t height = 16;
     uint32_t steps = 1;
     uint32_t number_of_threads = 1;
-    bool optimize_mpi = true;
+    bool optimize_mpi = false;
     bool print_every_step = false;
     bool print_hash = false;
     bool print_field = false;
@@ -52,14 +52,14 @@ int main(int argc, char *argv[])
     for (int i = 1; i < argc; i++)
     {
         std::string arg = std::string(argv[i]);
-        if (arg == "--help")
+        if (my_rank == 0 && arg == "--help")
         {
             std::cout << "-w WIDTH\n";
             std::cout << "-h HIGH\n";
             std::cout << "-s STEPS\n";
             std::cout << "-m {SINGLE, SHARED, MPI, HYBRID}\n";
             std::cout << "-p {NUMBER_OF_THREADS} (for shared and hybrid (per mpi process))\n";
-            std::cout << "-o (optimize mpi send) // TODO\n";
+            std::cout << "-o (optimize mpi send)\n";
             std::cout << "-a (print all steps)\n";
             std::cout << "-H (print hash)\n";
             std::cout << "-f (print field)\n";
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
         }
         if (arg == "-w")
         {
-            if (i + 1 == argc)
+            if (my_rank == 0 && i + 1 == argc)
             {
                 std::cout << "No width argument, use -w WIDTH" << std::endl;
                 return 1;
@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
         }
         else if (arg == "-h")
         {
-            if (i + 1 == argc)
+            if (my_rank == 0 && i + 1 == argc)
             {
                 std::cout << "No height argument, use -h HEIGHT" << std::endl;
                 return 1;
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
         }
         else if (arg == "-s")
         {
-            if (i + 1 == argc)
+            if (my_rank == 0 && i + 1 == argc)
             {
                 std::cout << "No steps argument, use -s STEPS" << std::endl;
                 return 1;
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
         }
         else if (arg == "-p")
         {
-            if (i + 1 == argc)
+            if (my_rank == 0 && i + 1 == argc)
             {
                 std::cout << "No threads argument, use -p THREADS" << std::endl;
                 return 1;
@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
         }
         else if (arg == "-d")
         {
-            if (i + 1 == argc)
+            if (my_rank == 0 && i + 1 == argc)
             {
                 std::cout << "No delay argument, use -d DELAY" << std::endl;
                 return 1;
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
         }
         else if (arg == "-r")
         {
-            if (i + 1 == argc)
+            if (my_rank == 0 && i + 1 == argc)
             {
                 std::cout << "No seed argument, use -r SEED" << std::endl;
                 return 1;
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
         }
         else if (arg == "-P")
         {
-            if (i + 1 == argc)
+            if (my_rank == 0 && i + 1 == argc)
             {
                 std::cout << "No percentage argument, use -P PERCENRAGE" << std::endl;
                 return 1;
@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
         std::string arg = std::string(argv[i]);
         if (arg == "-m")
         {
-            if (i + 1 == argc)
+            if (my_rank == 0 && i + 1 == argc)
             {
                 std::cout << "No mode argument, use -m MODE" << std::endl;
                 return 1;
@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
                     MPI_Finalize();
                     return 0;
                 }
-                if (print_launch_info)
+                if (my_rank == 0 && print_launch_info)
                 {
                     std::cout << "Running single threaded\n";
                 }
@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
                     MPI_Finalize();
                     return 0;
                 }
-                if (print_launch_info)
+                if (my_rank == 0 && print_launch_info)
                 {
                     std::cout << "Running " << number_of_threads << " threads\n";
                 }
@@ -230,18 +230,18 @@ int main(int argc, char *argv[])
             }
             if (mode == "mpi")
             {
-                if (print_launch_info)
+                if (my_rank == 0 && print_launch_info)
                 {
-                    std::cout << "Running " << commsize << " mpi processes\n";
+                    std::cout << "Running " << commsize << " mpi processes, optimization: " << optimize_mpi << "\n";
                 }
                 gol = new GameOfLifeMpi(width, height, commsize, my_rank, optimize_mpi);
             }
             if (mode == "hybrid")
             {
 
-                if (print_launch_info)
+                if (my_rank == 0 && print_launch_info)
                 {
-                    std::cout << "Running " << commsize << " mpi processes, each" << number_of_threads << " threads\n";
+                    std::cout << "Running " << commsize << " mpi processes, optimization: " << optimize_mpi << ", each" << number_of_threads << " threads\n";
                 }
                 gol = new GameOfLifeHybrid(width, height, commsize, my_rank, optimize_mpi, number_of_threads);
             }
@@ -255,23 +255,24 @@ int main(int argc, char *argv[])
             MPI_Finalize();
             return 0;
         }
-        if (print_launch_info)
+        if (my_rank == 0 && print_launch_info)
         {
             std::cout << "Running single threaded\n";
         }
         gol = new GameOfLife(width, height);
     }
 
-    if (print_launch_info)
-    {
-        std::cout << std::boolalpha;
-        std::cout << "Field: " << width << "x" << height << ", steps: " << steps << "\n";
-        std::cout << "Send optimization " << optimize_mpi << "\n";
-        std::cout << "Random seed: " << seed << "\n";
-        std::cout << "Start field density" << percentage << "%";
-        std::cout << std::endl;
-    }
+    // if (my_rank == 0 && print_launch_info)
+    // {
+    //     std::cout << std::boolalpha;
+    //     std::cout << "Field: " << width << "x" << height << ", steps: " << steps << "\n";
+    //     std::cout << "Send optimization " << optimize_mpi << "\n";
+    //     std::cout << "Random seed: " << seed << "\n";
+    //     std::cout << "Start field density " << percentage << "%";
+    //     std::cout << std::endl;
+    // }
 
+    std::cerr << my_rank << " started filling" << std::endl;
     std::mt19937 gen(seed);
     std::uniform_int_distribution<> distrib(0, 99);
     int random_num = distrib(gen);
@@ -282,7 +283,9 @@ int main(int argc, char *argv[])
             gol->set_cell(x, y, distrib(gen) < percentage);
         }
     }
-
+    gol->sync();
+    std::cerr << my_rank << " finished filling" << std::endl;
+    
     std::chrono::microseconds duration = std::chrono::microseconds(0);
 
     for (int i = 0; i < steps; i++)
@@ -316,14 +319,15 @@ int main(int argc, char *argv[])
             }
         }
 
-        if (my_rank == 0)
+        if (my_rank == 0 && print_every_step)
         {
             std::cout << std::endl;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+        std::cout << "\033[2J\033[H";
     }
 
-    if (print_calc_time)
+    if (my_rank == 0 && print_calc_time)
     {
         std::cout << "Calculation time: " << duration.count() / 1000000 << "." << std::setfill('0') << std::setw(6) << duration.count() % 1000000 << " seconds" << std::endl;
     }

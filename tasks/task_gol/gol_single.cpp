@@ -77,7 +77,6 @@ void GameOfLife::print(std::ostream &os) const
         }
         os << "\n";
     }
-    os << std::endl;
 }
 
 std::ostream& operator<<(std::ostream& os, const GameOfLife& b) {
