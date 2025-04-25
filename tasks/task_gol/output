@@ -1,0 +1,60 @@
+Running single threaded
+hash: 0xc6603bd14a1c480d
+Calculation time: 18.987379 seconds
+Running 1 threads
+hash: 0xc6603bd14a1c480d
+Calculation time: 16.574073 seconds
+Running 2 threads
+hash: 0xc6603bd14a1c480d
+Calculation time: 9.510433 seconds
+Running 4 threads
+hash: 0xc6603bd14a1c480d
+Calculation time: 5.958118 seconds
+Running 8 threads
+hash: 0xc6603bd14a1c480d
+Calculation time: 4.766722 seconds
+Running 12 threads
+hash: 0xc6603bd14a1c480d
+Calculation time: 4.598379 seconds
+Running 1 mpi processes, optimization: 0
+hash: 0xc6603bd14a1c480d
+Calculation time: 17.014934 seconds
+Running 2 mpi processes, optimization: 0
+hash: 0xc6603bd14a1c480d
+Calculation time: 8.796397 seconds
+Running 4 mpi processes, optimization: 0
+hash: 0xc6603bd14a1c480d
+Calculation time: 5.707541 seconds
+Running 8 mpi processes, optimization: 0
+hash: 0xc6603bd14a1c480d
+Calculation time: 4.068350 seconds
+Running 1 mpi processes, optimization: 1
+hash: 0xc6603bd14a1c480d
+Calculation time: 16.453868 seconds
+Running 2 mpi processes, optimization: 1
+hash: 0xc6603bd14a1c480d
+Calculation time: 9.477834 seconds
+Running 4 mpi processes, optimization: 1
+hash: 0xc6603bd14a1c480d
+Calculation time: 5.778244 seconds
+Running 8 mpi processes, optimization: 1
+hash: 0xc6603bd14a1c480d
+Calculation time: 4.033417 seconds
+Running 8 mpi processes, optimization: 1, each2 threads
+hash: 0xc6603bd14a1c480d
+Calculation time: 4.253617 seconds
+Running 8 mpi processes, optimization: 0, each2 threads
+hash: 0xc6603bd14a1c480d
+Calculation time: 4.554371 seconds
+Running 4 mpi processes, optimization: 1, each4 threads
+hash: 0xc6603bd14a1c480d
+Calculation time: 4.438643 seconds
+Running 4 mpi processes, optimization: 0, each4 threads
+hash: 0xc6603bd14a1c480d
+Calculation time: 4.411467 seconds
+Running 2 mpi processes, optimization: 1, each8 threads
+hash: 0xc6603bd14a1c480d
+Calculation time: 4.478956 seconds
+Running 2 mpi processes, optimization: 0, each8 threads
+hash: 0xc6603bd14a1c480d
+Calculation time: 4.456369 seconds

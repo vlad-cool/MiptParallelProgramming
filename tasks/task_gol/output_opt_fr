@@ -1,0 +1,25 @@
+10000000 x 16, 8 steps
+Running 1 mpi processes, optimization: 0
+hash: 0xdbc588d0434bfbcb
+Calculation time: 19.676520 seconds
+Running 2 mpi processes, optimization: 0
+hash: 0xdbc588d0434bfbcb
+Calculation time: 11.667642 seconds
+Running 4 mpi processes, optimization: 0
+hash: 0xdbc588d0434bfbcb
+Calculation time: 7.384258 seconds
+Running 8 mpi processes, optimization: 0
+hash: 0xdbc588d0434bfbcb
+Calculation time: 5.243787 seconds
+Running 1 mpi processes, optimization: 1
+hash: 0xdbc588d0434bfbcb
+Calculation time: 19.725610 seconds
+Running 2 mpi processes, optimization: 1
+hash: 0xdbc588d0434bfbcb
+Calculation time: 11.671855 seconds
+Running 4 mpi processes, optimization: 1
+hash: 0xdbc588d0434bfbcb
+Calculation time: 7.377642 seconds
+Running 8 mpi processes, optimization: 1
+hash: 0xdbc588d0434bfbcb
+Calculation time: 5.238480 seconds

@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
         //     std::cout << array[i] << " ";
         // }
         // std::cout << std::endl;
-        std::cout << "Sorting time: " << duration.count() / 1000000 << "." << std::setfill('0') << std::setw(6) << duration.count() % 1000000 << " seconds" << std::endl;
+        std::cout << commsize << " processes sorted " << numbers << " numbers in " << duration.count() / 1000000 << "." << std::setfill('0') << std::setw(6) << duration.count() % 1000000 << " seconds" << std::endl;
 
         // delete[] array;
     }
