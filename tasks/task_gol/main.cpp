@@ -324,7 +324,7 @@ int main(int argc, char *argv[])
             std::cout << std::endl;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(delay));
-        std::cout << "\033[2J\033[H";
+        // std::cout << "\033[2J\033[H";
     }
 
     if (my_rank == 0 && print_calc_time)

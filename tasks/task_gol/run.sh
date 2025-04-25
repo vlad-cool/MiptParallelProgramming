@@ -15,18 +15,17 @@
 # -r SEED (seed for random, default random_device())
 # -P PERCENT (percentage for random fill)
 
-WIDTH=1000000
+WIDTH=8192
 HEIGHT=256
-STEPS=8
+STEPS=256
 SEED=179
 
-# SCRIPT_DIR=$(realpath $(dirname $0))
-# cd $SCRIPT_DIR
-# SCRIPT_DIR=/students/rt20250309/parallel_programming/tasks/task_gol
-SCRIPT_DIR=.
+SCRIPT_DIR=$(realpath $(dirname $0))
 
 HASH=-H
 INFO=-i
+
+echo $(WIDTH)x$(HEIGHT), $STEPS steps
 
 mpirun -np 1 $SCRIPT_DIR/bin/main -w $WIDTH -h $HEIGHT -s $STEPS $HASH -t $INFO -r $SEED -m SINGLE
 

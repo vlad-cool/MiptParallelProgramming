@@ -24,7 +24,7 @@ bin/gol_mpi.o: gol_mpi.cpp gol_mpi.h gol_single.h
 	mkdir -p bin
 	$(CXX) $(CXXFLAGS) -c gol_mpi.cpp -o bin/gol_mpi.o
 
-bin/gol_hybrid.o: gol_hybrid.cpp gol_hybrid.h gol_single.h gol_shared
+bin/gol_hybrid.o: gol_hybrid.cpp gol_hybrid.h gol_single.h gol_shared.h
 	mkdir -p bin
 	$(CXX) $(CXXFLAGS) -c gol_hybrid.cpp -o bin/gol_hybrid.o
 
