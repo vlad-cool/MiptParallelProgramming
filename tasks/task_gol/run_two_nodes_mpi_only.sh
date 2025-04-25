@@ -30,5 +30,5 @@ INFO=-i
 
 mpirun -np 1 $SCRIPT_DIR/bin/main -w $WIDTH -h $HEIGHT -s $STEPS $HASH -t $INFO -r $SEED -m SINGLE 2> /dev/null
 
-mpirun -np 16 $SCRIPT_DIR/bin/main -w $WIDTH -h $HEIGHT -s $STEPS $HASH -t $INFO -r $SEED -m MPI -o 2> /dev/null
-mpirun -np 16 $SCRIPT_DIR/bin/main -w $WIDTH -h $HEIGHT -s $STEPS $HASH -t $INFO -r $SEED -m MPI 2> /dev/null
+mpirun -np 12 $SCRIPT_DIR/bin/main -w $WIDTH -h $HEIGHT -s $STEPS $HASH -t $INFO -r $SEED -m MPI -o 2> /dev/null
+mpirun -np 12 $SCRIPT_DIR/bin/main -w $WIDTH -h $HEIGHT -s $STEPS $HASH -t $INFO -r $SEED -m MPI 2> /dev/null

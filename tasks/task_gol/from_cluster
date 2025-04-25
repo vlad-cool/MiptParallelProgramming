@@ -1,0 +1,18 @@
+Running single threaded
+hash: 0xec45b9f513fc2f30
+Calculation time: 40.888978 seconds
+Running 2 mpi processes, optimization: 1, each8 threads
+hash: 0xec45b9f513fc2f30
+Calculation time: 2.995203 seconds
+Running 2 mpi processes, optimization: 0, each8 threads
+hash: 0xec45b9f513fc2f30
+Calculation time: 3.007770 seconds
+Running single threaded
+hash: 0xec45b9f513fc2f30
+Calculation time: 40.864630 seconds
+Running 16 mpi processes, optimization: 1
+hash: 0xec45b9f513fc2f30
+Calculation time: 2.726947 seconds
+Running 16 mpi processes, optimization: 0
+hash: 0xec45b9f513fc2f30
+Calculation time: 2.713315 seconds

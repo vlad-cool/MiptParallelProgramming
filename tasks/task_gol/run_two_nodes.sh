@@ -28,7 +28,7 @@ SCRIPT_DIR=/students/rt20250309/parallel_programming/tasks/task_gol
 HASH=-H
 INFO=-i
 
-mpirun -np 1 $SCRIPT_DIR/bin/main -w $WIDTH -h $HEIGHT -s $STEPS $HASH -t $INFO -r $SEED -m SINGLE # 2> /dev/null
+mpirun -np 1 $SCRIPT_DIR/bin/main -w $WIDTH -h $HEIGHT -s $STEPS $HASH -t $INFO -r $SEED -m SINGLE 2> /dev/null
 
-mpirun -np 2 $SCRIPT_DIR/bin/main -w $WIDTH -h $HEIGHT -s $STEPS $HASH -t $INFO -r $SEED -m HYBRID -p 8 -o # 2> /dev/null
-mpirun -np 2 $SCRIPT_DIR/bin/main -w $WIDTH -h $HEIGHT -s $STEPS $HASH -t $INFO -r $SEED -m HYBRID -p 8 # 2> /dev/null
+mpirun --map-by node:pe=8 -np 2 $SCRIPT_DIR/bin/main -w $WIDTH -h $HEIGHT -s $STEPS $HASH -t $INFO -r $SEED -m HYBRID -p 6 -o 2> /dev/null
+mpirun --map-by node:pe=8 -np 2 $SCRIPT_DIR/bin/main -w $WIDTH -h $HEIGHT -s $STEPS $HASH -t $INFO -r $SEED -m HYBRID -p 6 2> /dev/null
