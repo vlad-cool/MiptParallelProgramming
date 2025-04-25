@@ -89,11 +89,12 @@ int main(int argc, char *argv[])
         std::uniform_int_distribution<int> dist(0, numbers);
         int random_num = dist(gen);
 
-        // for (long long i = 0; i < numbers; i++)
-        // {
-        //     array[i] = dist(gen);
-        //     std::cout << array[i] << " ";
-        // }
+        for (long long i = 0; i < numbers; i++)
+        {
+            array[i] = dist(gen);
+            // array[i] = i;
+            // std::cout << array[i] << " ";
+        }
         // std::cout << std::endl;
         
         int offset = get_size(numbers, 0, commsize);
