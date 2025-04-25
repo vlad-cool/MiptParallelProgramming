@@ -4,18 +4,10 @@
 #include <cmath>
 #include <random>
 #include <stack>
+#include <chrono>
 #include <mpi.h>
 
-#define SPLIT_NUMBER 2
 #define BUBBLE_THRESHOLD 16
-
-struct SortTask {
-    int executior_rangs[SPLIT_NUMBER];
-    int size;
-};
-
-int commsize, my_rank;
-std::stack<SortTask> sort_tasks;
 
 void swap(int *a, int *b)
 {
@@ -52,19 +44,25 @@ void sort(int *array, size_t size)
     }
     else
     {
-        SortTask sort_task;
-        int part_size = (size + SPLIT_NUMBER - 1) / SPLIT_NUMBER;
-        for (int i = 0; i < SPLIT_NUMBER; i++)
+        size_t pivot = 0;
+        swap(array, array + pivot);
+        for (int i = 1; i < size; i++)
         {
-            if (i == SPLIT_NUMBER - 1)
+            if (array[i] < array[pivot])
             {
-                part_size = size - part_size * (SPLIT_NUMBER - 1);
+                swap(array + i, array + pivot + 1);
+                swap(array + pivot, array + pivot + 1);
+                pivot++;
             }
-            sort_task.executior_rangs[i] = (my_rank + 1 + i) % commsize;
-            MPI_Send(&part_size, 1, MPI_INT, sort_task.executior_rangs[i], 0, MPI_COMM_WORLD);
-            MPI_Send(array + part_size * i, part_size, MPI_INT, sort_task.executior_rangs[i], 0, MPI_COMM_WORLD);
         }
+        sort(array, pivot);
+        sort(array + pivot + 1, size - pivot - 1);
     }
+}
+
+int get_size(int size, int rank, int commsize)
+{
+    return (size / commsize) + (rank < size % commsize);
 }
 
 int main(int argc, char *argv[])
@@ -81,79 +79,96 @@ int main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &commsize);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
-    // if (commsize == 1)
-    // {
-    //     std::cout << "Not enough threads, minimum two required"
-    // }
-
-    
     if (my_rank == 0)
-    {
+    { 
+        auto start = std::chrono::high_resolution_clock::now();
+        
         int *array = new int[numbers];
-        std::random_device rd;  
-        std::mt19937 gen(rd()); 
-        std::uniform_int_distribution<int> dist(0, numbers); 
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<int> dist(0, numbers);
+        int random_num = dist(gen);
 
-        int random_num = dist(gen); 
-
-        for (long long i = 0; i < numbers; i++)
+        // for (long long i = 0; i < numbers; i++)
+        // {
+        //     array[i] = dist(gen);
+        //     std::cout << array[i] << " ";
+        // }
+        // std::cout << std::endl;
+        
+        int offset = get_size(numbers, 0, commsize);
+        for (int i = 1; i < commsize; i++)
         {
-            array[i] = dist(gen);
-            std::cout << array[i] << std::endl;
+            int step = get_size(numbers, i, commsize);
+            MPI_Send(&step, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+            MPI_Send(array + offset, step, MPI_INT, i, 0, MPI_COMM_WORLD);
+            offset += step;
         }
-        sort(array, numbers);
+        
+        sort(array, get_size(numbers, 0, commsize));
+        
+        int **recieve_buffers = new int *[commsize];
+        for (int i = 0; i < commsize; i++)
+        {
+            recieve_buffers[i] = new int[get_size(numbers, i, commsize)];
+        }
+        for (int i = 1; i < commsize; i++)
+        {
+            MPI_Status status;
+            MPI_Recv(recieve_buffers[i], get_size(numbers, i, commsize), MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+        }
+        for (size_t i = 0; i < get_size(numbers, 0, commsize); i++)
+        {
+            recieve_buffers[0][i] = array[i];
+        }
+        int *indexes = new int[commsize];
+        for (int i = 0; i < commsize; i++)
+        {
+            indexes[i] = 0;
+        }
+        for (int i = 0; i < numbers; i++)
+        {
+            int min_index = -1;
+            int min = 0;
+            for (int j = 0; j < commsize; j++)
+            {
+                if (indexes[j] == get_size(numbers, j, commsize))
+                {
+                    continue;
+                }
+                if (min_index == -1 || recieve_buffers[j][indexes[j]] < min)
+                {
+                    min_index = j;
+                    min = recieve_buffers[j][indexes[j]];
+                }
+            }
+            indexes[min_index]++;
+            array[i] = min;
+
+        }
+
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+
+        // for (long long i = 0; i < numbers; i++)
+        // {
+        //     std::cout << array[i] << " ";
+        // }
+        // std::cout << std::endl;
+        std::cout << "Sorting time: " << duration.count() / 1000000 << "." << std::setfill('0') << std::setw(6) << duration.count() % 1000000 << " seconds" << std::endl;
+
+        // delete[] array;
+    }
+    else
+    {
+        int size = 0;
+        MPI_Status status;
+        MPI_Recv(&size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
+        int *array = new int[size];
+        MPI_Recv(array, size, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
+        sort(array, size);
+        MPI_Send(array, size, MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
 
-    
-
-    // MPI_Status status;
-
-    // long long from, to;
-
-    // from = N / commsize * my_rank;
-    // if (my_rank + 1 == commsize)
-    //     to = N;
-    // else
-    //     to = N / commsize * (my_rank + 1);
-
-    // BigInt inverted_factorial = precision;
-    // BigInt res = 0;
-
-    // for (unsigned int i = from; i < to; i++)
-    // {
-    //     if (i != 0)
-    //     {
-    //         inverted_factorial = inverted_factorial / i;
-    //     }
-    //     res = res + inverted_factorial;
-    // }
-
-    // if (my_rank + 1 != commsize)
-    // {
-    //     int buf_size;
-    //     MPI_Recv(&buf_size, 1, MPI_INT, my_rank + 1, 0, MPI_COMM_WORLD, &status);
-    //     unsigned int *buf = new unsigned int[buf_size];
-    //     MPI_Recv(buf, buf_size, MPI_INT, my_rank + 1, 0, MPI_COMM_WORLD, &status);
-
-    //     BigInt next_res(buf, buf_size);
-    //     delete[] buf;
-    //     res = (next_res * inverted_factorial).divide_power_10(power) + res;
-    // }
-
-    // if (my_rank != 0)
-    // {
-    //     int buf_size = res.get_size();
-    //     MPI_Send(&buf_size, 1, MPI_INT, my_rank - 1, 0, MPI_COMM_WORLD);
-    //     unsigned int *buf = res.get_data();
-    //     MPI_Send(buf, buf_size, MPI_INT, my_rank - 1, 0, MPI_COMM_WORLD);
-    // }
-
-    // if (my_rank == 0)
-    // {
-    //     std::cout << res.divide_power_10(EXTRA_DGITS) << std::endl;
-    // }
-
-    delete[] array;
-    
     MPI_Finalize();
 }

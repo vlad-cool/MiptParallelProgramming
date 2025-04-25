@@ -6,7 +6,8 @@ CXXFLAGS = -O2
 all: main
 
 main: task_sort.cpp
-	$(CXX) $(CXXFLAGS) task_sort.cpp -o main
+	mkdir -p bin
+	$(CXX) $(CXXFLAGS) task_sort.cpp -o bin/main
 
 clean:
-	rm -f main
+	rm -f bin/*
