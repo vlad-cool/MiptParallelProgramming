@@ -1,0 +1,16 @@
+1 processes sorted 10000 numbers in 0.000892 seconds
+2 processes sorted 10000 numbers in 0.002815 seconds
+3 processes sorted 10000 numbers in 0.000657 seconds
+4 processes sorted 10000 numbers in 0.000748 seconds
+6 processes sorted 10000 numbers in 0.001153 seconds
+8 processes sorted 10000 numbers in 0.001075 seconds
+12 processes sorted 10000 numbers in 0.001494 seconds
+16 processes sorted 10000 numbers in 0.002176 seconds
+1 processes sorted 200000 numbers in 0.038567 seconds
+2 processes sorted 200000 numbers in 0.026878 seconds
+3 processes sorted 200000 numbers in 0.017788 seconds
+4 processes sorted 200000 numbers in 0.022528 seconds
+6 processes sorted 200000 numbers in 0.022686 seconds
+8 processes sorted 200000 numbers in 0.023607 seconds
+12 processes sorted 200000 numbers in 0.035621 seconds
+16 processes sorted 200000 numbers in 0.046925 seconds
