@@ -6,69 +6,8 @@
 #include <cassert>
 #include <numbers>
 
-// #define DEBUG
-
-double x_step = 1e-3;
-double t_step = 1e-3;
-
-double x_max = 10;
-double t_max = 10;
-
-double f(double x, double t)
-{
-    // if (t > 0.25)
-    // {
-    //     return (t - 0.25) / 10;
-    // }
-    // else
-    // {
-    //     return 0;
-    // }
-    // return x;
-    // return 0;
-    return 0.3;
-    // return std::sin(x * t);
-}
-
-double phi(double x)
-{
-    // return 0;
-    // return 1;
-    return std::sin(x * std::numbers::pi * 4);
-}
-
-double psi(double t)
-{
-    return t / 3;
-    // return 0;
-    // return 1 - std::cos(t / 5);
-    // return t;
-}
-
-void rectangle_step(double **field, uint64_t x_i, uint64_t t_i)
-{
-#ifdef DEBUG
-    assert(field[t_i][x_i] == 0.0);
-    assert(field[t_i + 1][x_i] == 0.0);
-    assert(field[t_i][x_i + 1] == 0.0);
-#endif
-    field[t_i][x_i] = 0;
-    field[t_i][x_i] += 2 * x_step * t_step * f((x_i - 0.5) * x_step, (t_i - 0.5) * t_step);
-    field[t_i][x_i] += x_step * (field[t_i - 1][x_i] - field[t_i][x_i - 1] + field[t_i - 1][x_i - 1]);
-    field[t_i][x_i] += t_step * (field[t_i][x_i - 1] - field[t_i - 1][x_i] + field[t_i - 1][x_i - 1]);
-    field[t_i][x_i] /= (x_step + t_step);
-}
-
-void rectangle_scheme(double **field, uint64_t t_0, uint64_t t_n, uint64_t x_0, uint64_t x_n)
-{
-    for (uint64_t t_i = t_0; t_i < t_n; t_i++)
-    {
-        for (uint64_t x_i = x_0; x_i < x_n; x_i++)
-        {
-            rectangle_step(field, x_i, t_i);
-        }
-    }
-}
+#include "problem.h"
+#include "common.h"
 
 int main(int argc, char *argv[])
 {
