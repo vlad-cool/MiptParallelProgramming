@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <cassert>
+#include <numbers>
 
 // #define DEBUG
 
@@ -11,23 +12,37 @@ double x_step = 1e-3;
 double t_step = 1e-3;
 
 double x_max = 10;
-double t_max = 5;
+double t_max = 10;
 
 double f(double x, double t)
 {
-    return std::sin(x * t);
+    // if (t > 0.25)
+    // {
+    //     return (t - 0.25) / 10;
+    // }
+    // else
+    // {
+    //     return 0;
+    // }
+    // return x;
+    // return 0;
+    return 0.3;
+    // return std::sin(x * t);
 }
 
 double phi(double x)
 {
-    return std::sin(x / 10);
+    // return 0;
+    // return 1;
+    return std::sin(x * std::numbers::pi * 4);
 }
 
 double psi(double t)
 {
-    return t / 10;
+    return t / 3;
     // return 0;
     // return 1 - std::cos(t / 5);
+    // return t;
 }
 
 void rectangle_step(double **field, uint64_t x_i, uint64_t t_i)

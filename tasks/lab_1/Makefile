@@ -7,10 +7,14 @@ build: bin/main
 
 all: build run plot
 
-run:
+run: data.dat
+
+data.dat: bin/main
 	./bin/main > data.dat
 
-plot:
+plot: heatmap.png
+
+heatmap.png: data.dat plot.gp
 	./plot.gp
 
 bin/main: bin/main.o

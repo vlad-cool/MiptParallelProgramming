@@ -13,3 +13,4 @@ tasks/task_sort/main
 tasks/task_gol/bin/
 tasks/task_sort/bin/
 tasks/lab_1/bin/
+.vscode/
