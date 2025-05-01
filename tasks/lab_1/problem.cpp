@@ -3,8 +3,8 @@
 
 #include "problem.h"
 
-double x_step = 1e-2;
-double t_step = 1e-2;
+double x_step = 5e-3;
+double t_step = 5e-3;
 
 double x_max = 100;
 double t_max = 100;
@@ -13,7 +13,7 @@ const double c = 1.35; // should be positive
 
 double phi(double x)
 {
-    return std::sin(x/5);
+    return std::sin(x/5) * x / 20;
 }
 
 double psi(double t)
@@ -23,10 +23,7 @@ double psi(double t)
 
 double f(double x, double t)
 {
-    int s = static_cast<int>(x) % 100;
-    if((s < 40) || (s > 60))
-        return 0;
-    return 5*std::sin(x);
+    return std::max(0.0, 100 - (x - 50) * (x - 50)) / 100;
 }
 
 // double f(double x, double t)
