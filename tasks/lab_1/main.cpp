@@ -43,12 +43,6 @@ int main(int argc, char *argv[])
         std::cout << std::endl;
     };
 
-#ifdef DEBUG
-    for (uint64_t i = 0; i < x_n * t_n)
-    {
-    }
-#endif
-
     delete[] field;
     delete[] buf;
 }
