@@ -5,19 +5,21 @@
 #include <cstddef>
 #include <cassert>
 #include <numbers>
+#include <chrono>
 
 #include "problem.h"
 #include "common.h"
 
 int main(int argc, char *argv[])
 {
-    int32_t size = 3;
+    auto start = std::chrono::high_resolution_clock::now();
+    int32_t size = 8;
 
     int32_t x_n = static_cast<int32_t>(std::ceil(x_max / x_step));
     int32_t t_n = static_cast<int32_t>(std::ceil(t_max / t_step));
 
-    int32_t chunk_x_size = 100;
-    int32_t chunk_t_size = 100;
+    int32_t chunk_x_size = 1000;
+    int32_t chunk_t_size = 1000;
 
     int32_t chunk_x_n = (x_n + chunk_x_size - 1) / chunk_x_size;
     int32_t chunk_t_n = (t_n + chunk_t_size - 1) / chunk_t_size;
@@ -54,6 +56,10 @@ int main(int argc, char *argv[])
 
     rectangle_scheme(field, 1, t_n - 1, 1, x_n - 1);
 
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    std::cerr << "Calculation time: " << duration.count() / 1000000 << "." << std::setfill('0') << std::setw(6) << duration.count() % 1000000 << " seconds" << std::endl;
+    
     for (int32_t t_i = 0; t_i < t_n; t_i += 10)
     {
         for (int32_t x_i = 0; x_i < x_n; x_i += 10)

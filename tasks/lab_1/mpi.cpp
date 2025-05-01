@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cassert>
 #include <numbers>
+#include <chrono>
 #include <mpi.h>
 
 #include "problem.h"
@@ -12,6 +13,7 @@
 
 int main(int argc, char *argv[])
 {
+    auto start = std::chrono::high_resolution_clock::now();
     int32_t size, rank;
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -20,8 +22,8 @@ int main(int argc, char *argv[])
     int32_t x_n = static_cast<int32_t>(std::ceil(x_max / x_step));
     int32_t t_n = static_cast<int32_t>(std::ceil(t_max / t_step));
 
-    int32_t chunk_x_size = 100;
-    int32_t chunk_t_size = 100;
+    int32_t chunk_x_size = 1000;
+    int32_t chunk_t_size = 1000;
 
     int32_t chunk_x_n = (x_n + chunk_x_size - 1) / chunk_x_size;
     int32_t chunk_t_n = (t_n + chunk_t_size - 1) / chunk_t_size;
@@ -42,11 +44,6 @@ int main(int argc, char *argv[])
         field[i] = buf + i * x_n;
     }
 
-    for (int32_t i = 0; i < x_n * t_n; i++)
-    {
-        // field[0][i] = rank;
-    }
-
     for (int32_t t_i = 0; t_i < t_n; t_i++)
     {
         field[t_i][0] = psi(t_step * t_i);
@@ -65,8 +62,17 @@ int main(int argc, char *argv[])
             {
                 if (chunk_number >= size && chunk_number - size < (chunk_t_n * chunk_x_n / size - chunk_x_n))
                 {
+                    int32_t rec_x = chunk_x_i - size;
+                    int32_t rec_t = chunk_t_i + size;
+
+                    if (rec_x < 0)
+                    {
+                        rec_x += chunk_x_n;
+                        rec_t -= size;
+                    }
+
                     MPI_Recv(
-                        field[(chunk_t_i + size) * chunk_t_size] + (chunk_x_i + chunk_x_n - size) % chunk_x_n,
+                        field[rec_t * chunk_t_size] + rec_x * chunk_x_size + 1,
                         chunk_x_size,
                         MPI_DOUBLE,
                         size - 1, 0,
@@ -77,7 +83,7 @@ int main(int argc, char *argv[])
             else
             {
                 MPI_Recv(
-                    field[chunk_t_i * chunk_t_size] + chunk_x_i * chunk_x_size,
+                    field[chunk_t_i * chunk_t_size] + chunk_x_i * chunk_x_size + 1,
                     chunk_x_size,
                     MPI_DOUBLE,
                     rank - 1,
@@ -112,7 +118,6 @@ int main(int argc, char *argv[])
             {
                 continue;
             }
-            std::cerr << i << " " << chunk_t_size << " " << x_n << std::endl;
             MPI_Recv(field[i * chunk_t_size], chunk_t_size * x_n, MPI_DOUBLE, current_rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
     }
@@ -122,6 +127,13 @@ int main(int argc, char *argv[])
         {
             MPI_Send(field[i * chunk_t_size], chunk_t_size * x_n, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
         }
+    }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    if (rank == 0)
+    {
+        std::cerr << "Proceses: " << size << " calculation time: " << duration.count() / 1000000 << "." << std::setfill('0') << std::setw(6) << duration.count() % 1000000 << " seconds" << std::endl;
     }
 
     if (rank == 0)
@@ -135,6 +147,7 @@ int main(int argc, char *argv[])
             std::cout << std::endl;
         }
     }
+
 
     delete[] field[0];
     delete[] field;

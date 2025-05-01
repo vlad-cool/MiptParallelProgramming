@@ -1,20 +1,25 @@
 CXX = mpic++
 CXXFLAGS = -O3 -std=c++23 -Wall
 
-.PHONY: clean build run plot all
+.PHONY: clean build run plot run_mpi all
 
-all: build run plot
+all: build run plot run_mpi
 
 build: bin/main bin/mpi
 
 run: result/data.dat
 
+run_mpi: result/data_mpi.dat
+
 result/data.dat: bin/main
 	./bin/main > result/data.dat
 
-plot: result/heatmap.png
+result/data_mpi.dat: bin/mpi
+	mpirun -np 8 ./bin/mpi > result/data_mpi.dat
 
-result/heatmap.png: result/data.dat plot.gp
+plot: result/heatmap.png result/heatmap_mpi.png
+
+result/heatmap.png: result/data.dat result/data_mpi.dat plot.gp
 	./plot.gp
 
 bin/main: bin/main.o bin/common.o bin/problem.o
