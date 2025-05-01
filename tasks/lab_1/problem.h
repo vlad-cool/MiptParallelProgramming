@@ -7,6 +7,8 @@
 extern double x_step;
 extern double t_step;
 
+extern double a;
+
 extern double x_max;
 extern double t_max;
 

@@ -37,6 +37,8 @@ int main(int argc, char *argv[])
     x_step = x_max / x_n;
     t_step = t_max / t_n;
 
+    x_step = x_step / a;
+
     double *buf = new double[x_n * t_n];
     double **field = new double *[t_n];
     for (int32_t i = 0; i < t_n; i++)

@@ -6,6 +6,8 @@
 double x_step = 5e-3;
 double t_step = 5e-3;
 
+double a = 1;
+
 double x_max = 100;
 double t_max = 100;
 

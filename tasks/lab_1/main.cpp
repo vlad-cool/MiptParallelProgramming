@@ -33,6 +33,8 @@ int main(int argc, char *argv[])
     x_step = x_max / x_n;
     t_step = t_max / t_n;
 
+    x_step = x_step / a;
+    
     // int32_t x_n = static_cast<int32_t>(std::ceil(x_max / x_step));
     // int32_t t_n = static_cast<int32_t>(std::ceil(t_max / t_step));
     // x_step = x_max / x_n;
