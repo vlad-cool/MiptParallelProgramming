@@ -1,5 +1,5 @@
 CXX = mpic++
-CXXFLAGS = -O3 -std=c++23
+CXXFLAGS = -O3 -std=c++23 -Wall
 
 .PHONY: clean build run plot all
 

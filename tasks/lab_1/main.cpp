@@ -32,13 +32,13 @@ int main(int argc, char *argv[])
         field[0][x_i] = phi(x_step * x_i);
     }
 
-    rectangle_scheme(field, 1, t_n, 1, x_n);
+    rectangle_scheme(field, 1, t_n - 1, 1, x_n - 1);
 
     for (uint64_t t_i = 0; t_i < t_n; t_i += 10)
     {
         for (uint64_t x_i = 0; x_i < x_n; x_i += 10)
         {
-            std::cout << std::setw(8) << field[t_i][x_i] << " ";
+            std::cout << std::setw(9) << std::showpos << std::fixed << std::setprecision(6) << field[t_i][x_i] << " ";
         }
         std::cout << std::endl;
     };

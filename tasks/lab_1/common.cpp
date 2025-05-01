@@ -12,9 +12,9 @@ void rectangle_step(double **field, uint64_t x_i, uint64_t t_i)
 
 void rectangle_scheme(double **field, uint64_t t_0, uint64_t t_n, uint64_t x_0, uint64_t x_n)
 {
-    for (uint64_t t_i = t_0; t_i < t_n; t_i++)
+    for (uint64_t t_i = t_0; t_i < t_n + t_0; t_i++)
     {
-        for (uint64_t x_i = x_0; x_i < x_n; x_i++)
+        for (uint64_t x_i = x_0; x_i < x_n + t_0; x_i++)
         {
             rectangle_step(field, x_i, t_i);
         }
