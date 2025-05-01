@@ -36,11 +36,16 @@ int main(int argc, char *argv[])
     x_step = x_max / x_n;
     t_step = t_max / t_n;
 
+    double *buf = new double[x_n * t_n];
     double **field = new double *[t_n];
-    field[0] = new double[x_n * t_n];
-    for (int32_t i = 1; i < t_n; i++)
+    for (int32_t i = 0; i < t_n; i++)
     {
-        field[i] = field[0] + i * x_n;
+        field[i] = buf + i * x_n;
+    }
+
+    for (int32_t i = 0; i < x_n * t_n; i++)
+    {
+        // field[0][i] = rank;
     }
 
     for (int32_t t_i = 0; t_i < t_n; t_i++)
@@ -62,8 +67,7 @@ int main(int argc, char *argv[])
                 if (chunk_number >= size && chunk_number - size < (chunk_t_n * chunk_x_n / size - chunk_x_n))
                 {
                     MPI_Recv(
-                        field[(chunk_t_i + 1) * chunk_t_size] + (chunk_x_i + chunk_x_n - size) % chunk_x_n,
-                        // buf,
+                        field[(chunk_t_i + size) * chunk_t_size] + (chunk_x_i + chunk_x_n - size) % chunk_x_n,
                         chunk_x_size,
                         MPI_DOUBLE,
                         size - 1, 0,
@@ -88,7 +92,7 @@ int main(int argc, char *argv[])
             if (rank + 1 != size || chunk_t_i + 1 < chunk_t_n)
             {
                 MPI_Send(
-                    field[(chunk_t_i + 1) * chunk_t_size - 1] + chunk_x_n * chunk_x_size,
+                    field[(chunk_t_i + 1) * chunk_t_size - 1] + chunk_x_i * chunk_x_size,
                     chunk_x_size,
                     MPI_DOUBLE,
                     (rank + 1) % size,
@@ -114,12 +118,6 @@ int main(int argc, char *argv[])
     else
     {
     }
-
-#ifdef DEBUG
-    for (int32_t i = 0; i < x_n * t_n)
-    {
-    }
-#endif
 
     delete[] field[0];
     delete[] field;
