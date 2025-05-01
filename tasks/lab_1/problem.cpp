@@ -9,7 +9,6 @@ double t_step = 1e-2;
 double x_max = 100;
 double t_max = 100;
 
-
 const double c = 1.35; // should be positive
 
 double phi(double x)

@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
             if (rank + 1 != size || chunk_t_i + 1 < chunk_t_n)
             {
                 MPI_Send(
-                    field[(chunk_t_i + 1) * chunk_t_size] + chunk_x_i * chunk_x_size,
+                    field[(chunk_t_i + 1) * chunk_t_size] + chunk_x_i * chunk_x_size + 1,
                     chunk_x_size,
                     MPI_DOUBLE,
                     (rank + 1) % size,
@@ -118,14 +118,14 @@ int main(int argc, char *argv[])
             {
                 continue;
             }
-            MPI_Recv(field[i * chunk_t_size], chunk_t_size * x_n, MPI_DOUBLE, current_rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(field[i * chunk_t_size + 1], chunk_t_size * x_n, MPI_DOUBLE, current_rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
     }
     else
     {
         for (int32_t i = rank; i < chunk_t_n; i += size)
         {
-            MPI_Send(field[i * chunk_t_size], chunk_t_size * x_n, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+            MPI_Send(field[i * chunk_t_size + 1], chunk_t_size * x_n, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
         }
     }
 
