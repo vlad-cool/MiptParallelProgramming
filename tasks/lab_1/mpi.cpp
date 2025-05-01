@@ -12,7 +12,6 @@
 
 int main(int argc, char *argv[])
 {
-
     int32_t size, rank;
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -92,7 +91,7 @@ int main(int argc, char *argv[])
             if (rank + 1 != size || chunk_t_i + 1 < chunk_t_n)
             {
                 MPI_Send(
-                    field[(chunk_t_i + 1) * chunk_t_size - 1] + chunk_x_i * chunk_x_size,
+                    field[(chunk_t_i + 1) * chunk_t_size] + chunk_x_i * chunk_x_size,
                     chunk_x_size,
                     MPI_DOUBLE,
                     (rank + 1) % size,
@@ -106,6 +105,27 @@ int main(int argc, char *argv[])
 
     if (rank == 0)
     {
+        for (int32_t i = 0; i < chunk_t_n; i++)
+        {
+            int32_t current_rank = i % size;
+            if (current_rank == 0)
+            {
+                continue;
+            }
+            std::cerr << i << " " << chunk_t_size << " " << x_n << std::endl;
+            MPI_Recv(field[i * chunk_t_size], chunk_t_size * x_n, MPI_DOUBLE, current_rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        }
+    }
+    else
+    {
+        for (int32_t i = rank; i < chunk_t_n; i += size)
+        {
+            MPI_Send(field[i * chunk_t_size], chunk_t_size * x_n, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+        }
+    }
+
+    if (rank == 0)
+    {
         for (int32_t t_i = 0; t_i < t_n; t_i += 10)
         {
             for (int32_t x_i = 0; x_i < x_n; x_i += 10)
@@ -114,9 +134,6 @@ int main(int argc, char *argv[])
             }
             std::cout << std::endl;
         }
-    }
-    else
-    {
     }
 
     delete[] field[0];

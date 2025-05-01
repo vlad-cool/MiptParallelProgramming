@@ -11,10 +11,30 @@
 
 int main(int argc, char *argv[])
 {
+    int32_t size = 3;
+
     int32_t x_n = static_cast<int32_t>(std::ceil(x_max / x_step));
     int32_t t_n = static_cast<int32_t>(std::ceil(t_max / t_step));
+
+    int32_t chunk_x_size = 100;
+    int32_t chunk_t_size = 100;
+
+    int32_t chunk_x_n = (x_n + chunk_x_size - 1) / chunk_x_size;
+    int32_t chunk_t_n = (t_n + chunk_t_size - 1) / chunk_t_size;
+
+    chunk_x_n = (chunk_x_n + size - 1) / size * size;
+    chunk_t_n = (chunk_t_n + size - 1) / size * size;
+
+    x_n = chunk_x_n * chunk_x_size + 1;
+    t_n = chunk_t_n * chunk_t_size + 1;
+
     x_step = x_max / x_n;
     t_step = t_max / t_n;
+
+    // int32_t x_n = static_cast<int32_t>(std::ceil(x_max / x_step));
+    // int32_t t_n = static_cast<int32_t>(std::ceil(t_max / t_step));
+    // x_step = x_max / x_n;
+    // t_step = t_max / t_n;
 
     double *buf = new double[x_n * t_n];
     double **field = new double *[t_n];
@@ -41,7 +61,7 @@ int main(int argc, char *argv[])
             std::cout << std::setw(9) << std::showpos << std::fixed << std::setprecision(6) << field[t_i][x_i] << " ";
         }
         std::cout << std::endl;
-    };
+    }
 
     delete[] field;
     delete[] buf;
