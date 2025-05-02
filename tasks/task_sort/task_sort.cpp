@@ -92,8 +92,8 @@ int main(int argc, char *argv[])
 
         for (long long i = 0; i < numbers; i++)
         {
-            // array[i] = dist(gen);
-            array[i] = i;
+            array[i] = dist(gen);
+            // array[i] = i;
             // std::cout << array[i] << " ";
         }
         // std::cout << std::endl;
