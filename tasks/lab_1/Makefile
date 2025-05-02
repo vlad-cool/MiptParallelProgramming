@@ -1,9 +1,14 @@
 CXX = mpic++
 CXXFLAGS = -O3 -std=c++23 -Wall
 
-.PHONY: clean build run plot run_mpi all show
+.PHONY: clean build run plot run_mpi all show introduce
 
-all: build run plot run_mpi
+all: build run plot run_mpi introduce
+
+introduce: bin/introduce
+
+bin/introduce:
+	$(CXX) $(CXXFLAGS) introduce.cpp -o bin/introduce
 
 show:
 	feh result/heatmap.png
