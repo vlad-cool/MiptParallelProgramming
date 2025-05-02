@@ -141,6 +141,11 @@ void thread_handler(size_t thread_id)
             {
                 i_mtx.lock();
 
+                if (next_worker == thread_id)
+                {
+                    next_worker += 1;
+                    next_worker %= number_of_threads;
+                }
                 intervals[next_worker].push_back(
                     IntegrationInterval(
                         interval.start,
@@ -149,6 +154,11 @@ void thread_handler(size_t thread_id)
                 next_worker += 1;
                 next_worker %= number_of_threads;
 
+                if (next_worker == thread_id)
+                {
+                    next_worker += 1;
+                    next_worker %= number_of_threads;
+                }
                 intervals[next_worker].push_back(
                     IntegrationInterval(
                         (interval.end + interval.start) / 2,
@@ -170,6 +180,8 @@ void thread_handler(size_t thread_id)
 
 int main(int argc, char *argv[])
 {
+    bool suppress_res = false;
+
     for (int i = 1; i < argc; i++)
     {
         std::string arg = std::string(argv[i]);
@@ -177,6 +189,7 @@ int main(int argc, char *argv[])
         {
             std::cout << "-t THREADS\n";
             std::cout << "-p PRECISION\n";
+            std::cout << "-s - suppres integral value\n";
             std::cout << std::endl;
             return 0;
         }
@@ -207,6 +220,10 @@ int main(int argc, char *argv[])
                 i++;
             }
         }
+        else if (arg == "-s")
+        {
+            suppress_res = true;
+        }
     }
 
     auto t_start = std::chrono::high_resolution_clock::now();
@@ -236,7 +253,7 @@ int main(int argc, char *argv[])
         tasks_counter.wait(a_w);
         a_w = tasks_counter.load();
     }
-    
+
     for (size_t i = 0; i < number_of_threads; i++)
     {
         threads[i].join();
@@ -246,6 +263,9 @@ int main(int argc, char *argv[])
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t_end - t_start).count();
     std::cout << number_of_threads << " " << duration / 1000000 << "." << std::setfill('0') << std::setw(6) << duration % 1000000 << " seconds" << std::endl;
 
-    std::cout << std::setprecision(16) << res << std::endl;
-    std::cout << std::setprecision(16) << std::fixed << epsilon * 10 << std::endl;
+    if (!suppress_res)
+    {
+        std::cout << std::setprecision(16) << res << std::endl;
+        std::cout << std::setprecision(16) << std::fixed << epsilon * 10 << std::endl;
+    }
 }

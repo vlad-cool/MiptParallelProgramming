@@ -6,8 +6,8 @@
 
 int main(int argc, char *argv[])
 {
-    int n = 64;
-    int buf_size = 4096 * 1024;
+    int n = 100;
+    int buf_size = 1000;
     int size, rank;
     
     int *buf = new int[buf_size];
@@ -33,12 +33,12 @@ int main(int argc, char *argv[])
         }
     }
     auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
     duration /= 2;
     duration /= n;
     if (rank == 0)
     {
-        std::cout << duration / 1000000 << "." << std::setfill('0') << std::setw(6) << duration % 1000000 << " seconds" << std::endl;
+        std::cout << duration / 1000000000 << "." << std::setfill('0') << std::setw(9) << duration % 1000000000 << " seconds" << std::endl;
     }
 
     MPI_Finalize();
