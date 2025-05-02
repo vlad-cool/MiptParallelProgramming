@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -O3 -std=c++23 -Wall
+CXXFLAGS = -O2 -std=c++23 -Wall
 
 .PHONY: clean build
 
