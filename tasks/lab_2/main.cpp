@@ -9,6 +9,7 @@
 #include <mutex>
 #include <iomanip>
 #include <cassert>
+#include <chrono>
 
 double f(double x)
 {
@@ -30,7 +31,6 @@ size_t next_worker;
 std::atomic<size_t> tasks_counter;
 
 std::mutex i_mtx;
-std::mutex w_c_mtx;
 std::mutex res_mtx;
 
 std::mutex dbg_mtx;
@@ -80,35 +80,22 @@ struct IntegrationResult
 double integrate_trapezoid(double from, double to, size_t intervals)
 {
     double step = (to - from) / intervals;
-    // assert(step == step);
-    // dbg_mtx.lock();
-    // std::cout << "step " << step << std::endl;
-    // dbg_mtx.unlock();
     double res = 0;
     for (size_t i = 1; i < intervals; i++)
     {
-        // assert(f(from + i * step) == f(from + i * step));
-        // assert(f(from + (i - 1) * step) == f(from + (i - 1) * step));
-        // res += (f(from + i * step) + f(from + i * step - step)) / 2 * step;
         res += f(from + i * step - step / 2) * step;
     }
-    // assert(res == res);
     return res;
 }
 
 IntegrationResult integrate(IntegrationInterval &interval)
 {
-    // dbg_mtx.lock();
-    // std::cout << "     " << interval.start << " " << interval.end << " " << interval.end - interval.start << " " << interval.n << std::endl;
-    // dbg_mtx.unlock();
-
     double integral_1 = integrate_trapezoid(interval.start, interval.end, interval.n);
     double integral_2 = integrate_trapezoid(interval.start, interval.end, interval.n * 2);
 
     assert(integral_1 == integral_1);
     assert(integral_2 == integral_2);
 
-    // std::cout << integral_1 << " " << integral_2 << " " << std::abs(integral_1 - integral_2) << std::endl;
     return IntegrationResult(integral_2, std::abs(integral_1 - integral_2) * (stop - start) / (interval.end - interval.start + epsilon));
 }
 
@@ -119,51 +106,39 @@ void thread_handler(size_t thread_id)
     size_t a_w = tasks_counter.load();
     while (a_w != 0)
     {
-        i_mtx.lock();
         // dbg_mtx.lock();
-        // std::cout << "     " << thread_id << " " << intervals[thread_id].size() << " " << a_w << std::endl;
+        // std::cout << "      " << thread_id << std::endl;
         // dbg_mtx.unlock();
+        i_mtx.lock();
         if (intervals[thread_id].size() == 0)
         {
             i_mtx.unlock();
-
             // dbg_mtx.lock();
-            // std::cout << thread_id << " aa " << a_w << std::endl;
+            // std::cout << "aaa " << thread_id << " " << a_w << std::endl;
             // dbg_mtx.unlock();
             tasks_counter.wait(a_w);
             // dbg_mtx.lock();
-            // std::cout << thread_id << " bb " << tasks_counter.load() << std::endl;
+            // std::cout << "bbb " << thread_id << " " << a_w << std::endl;
             // dbg_mtx.unlock();
         }
         else
         {
             IntegrationInterval interval = intervals[thread_id].front();
+            intervals[thread_id].pop_front();
             i_mtx.unlock();
 
             IntegrationResult result = integrate(interval);
-            
-            // dbg_mtx.lock();
-            // std::cout << "delta: " << result.delta << std::endl;
-            // dbg_mtx.unlock();
 
             if (result.delta < epsilon)
             {
-                res_mtx.lock();
-                res += result.integral;
-                res_mtx.unlock();
                 i_mtx.lock();
-                intervals[thread_id].pop_front();
-
-                // dbg_mtx.lock();
-                // std::cout << thread_id << " sub 1" << std::endl;
-                // dbg_mtx.unlock();
+                res += result.integral;
                 tasks_counter.fetch_sub(1);
                 tasks_counter.notify_all();
                 i_mtx.unlock();
             }
             else
             {
-                w_c_mtx.lock();
                 i_mtx.lock();
 
                 intervals[next_worker].push_back(
@@ -182,29 +157,59 @@ void thread_handler(size_t thread_id)
                 next_worker += 1;
                 next_worker %= number_of_threads;
 
-                intervals[thread_id].pop_front();
-
-                // dbg_mtx.lock();
-                // std::cout << thread_id << " add 1" << std::endl;
-                // dbg_mtx.unlock();
                 tasks_counter.fetch_add(1);
                 tasks_counter.notify_all();
 
                 i_mtx.unlock();
-                w_c_mtx.unlock();
             }
         }
 
         a_w = tasks_counter.load();
     }
-
-    // dbg_mtx.lock();
-    // std::cout << thread_id << " exited" << std::endl;
-    // dbg_mtx.unlock();
 }
 
 int main(int argc, char *argv[])
 {
+    for (int i = 1; i < argc; i++)
+    {
+        std::string arg = std::string(argv[i]);
+        if (arg == "--help")
+        {
+            std::cout << "-t THREADS\n";
+            std::cout << "-p PRECISION\n";
+            std::cout << std::endl;
+            return 0;
+        }
+        if (arg == "-t")
+        {
+            if (i + 1 == argc)
+            {
+                std::cout << "No threads argument, use -t THREADS" << std::endl;
+                return 1;
+            }
+            else
+            {
+                number_of_threads = std::stoi(argv[i + 1]);
+                i++;
+            }
+        }
+        else if (arg == "-p")
+        {
+            if (i + 1 == argc)
+            {
+                std::cout << "No precision argument, use -p PRECISION" << std::endl;
+                return 1;
+            }
+            else
+            {
+                int precision = std::stoi(argv[i + 1]) + 1;
+                epsilon = std::pow(10, -precision);
+                i++;
+            }
+        }
+    }
+
+    auto t_start = std::chrono::high_resolution_clock::now();
     std::vector<std::thread> threads;
     for (size_t i = 0; i < number_of_threads; i++)
     {
@@ -231,16 +236,16 @@ int main(int argc, char *argv[])
         tasks_counter.wait(a_w);
         a_w = tasks_counter.load();
     }
-
-    // dbg_mtx.lock();
-    // std::cout << "fgdfg " << std::setprecision(16) << res << std::endl;
-    // dbg_mtx.unlock();
-
+    
     for (size_t i = 0; i < number_of_threads; i++)
     {
         threads[i].join();
     }
+    auto t_end = std::chrono::high_resolution_clock::now();
+
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t_end - t_start).count();
+    std::cout << number_of_threads << " " << duration / 1000000 << "." << std::setfill('0') << std::setw(6) << duration % 1000000 << " seconds" << std::endl;
 
     std::cout << std::setprecision(16) << res << std::endl;
-    std::cout << std::setprecision(16) << std::fixed << epsilon << std::endl;
+    std::cout << std::setprecision(16) << std::fixed << epsilon * 10 << std::endl;
 }
