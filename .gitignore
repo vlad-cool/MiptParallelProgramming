@@ -16,4 +16,6 @@ tasks/lab_1/bin/
 tasks/lab_2/bin/
 tasks_omp/task_0_1
 tasks_omp/task_0_2
+tasks_omp/task_nested
+tasks_omp/task_balancing
 .vscode/
