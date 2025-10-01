@@ -19,3 +19,5 @@ tasks_omp/task_0_2
 tasks_omp/task_nested
 tasks_omp/task_balancing
 .vscode/
+tasks_omp/lab_1/simple
+tasks_omp/task_sort
