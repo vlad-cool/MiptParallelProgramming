@@ -1,89 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <chrono>
-
-void matrix_multiply_simple(size_t size, int **matr_1, int **matr_2, int **matr_res)
-{
-    for (size_t i = 0; i < size; i++)
-    {
-        for (size_t j = 0; j < size; j++)
-        {
-            matr_res[i][j] = 0;
-        }
-    }
-
-    for (size_t i = 0; i < size; i++)
-    {
-        for (size_t j = 0; j < size; j++)
-        {
-            for (size_t k = 0; k < size; k++)
-            {
-                matr_res[i][j] += matr_1[i][k] * matr_2[k][j];
-            }
-        }
-    }
-}
-
-void matrix_multiply_transpose_opt(size_t size, int **matr_1, int **matr_2, int **matr_res)
-{
-    for (size_t i = 0; i < size; i++)
-    {
-        for (size_t j = 0; j < size; j++)
-        {
-            matr_res[i][j] = 0;
-        }
-    }
-
-    for (size_t i = 0; i < size; i++)
-    {
-        for (size_t j = i + 1; j < size; j++)
-        {
-            std::swap(matr_2[i][j], matr_2[j][i]);
-        }
-    }
-
-    for (size_t i = 0; i < size; i++)
-    {
-        for (size_t j = 0; j < size; j++)
-        {
-            for (size_t k = 0; k < size; k++)
-            {
-                matr_res[i][j] += matr_1[i][k] * matr_2[j][k];
-            }
-        }
-    }
-}
-
-void matrix_multiply_block_opt(size_t size, size_t block_size, int **matr_1, int **matr_2, int **matr_res)
-{
-    for (size_t i = 0; i < size; i++)
-    {
-        for (size_t j = 0; j < size; j++)
-        {
-            matr_res[i][j] = 0;
-        }
-    }
-
-    for (size_t b_x = 0; b_x < size / block_size; b_x++)
-    {
-        for (size_t b_y = 0; b_y < size / block_size; b_y++)
-        {
-            for (size_t x = 0; x < block_size; x++)
-            {
-                for (size_t y = 0; y < block_size; y++)
-                {
-                    size_t i = b_x * block_size + x;
-                    size_t j = b_y * block_size + y;
-
-                    for (size_t k = 0; k < block_size; k++)
-                    {
-                        matr_res[i][j] += matr_1[i][k + b_y * block_size + k] * matr_2[b_x * block_size + k][j];
-                    }
-                }
-            }
-        }
-    }
-}
+#include <random>
 
 int **allocate_matrix(size_t size)
 {
@@ -129,6 +47,93 @@ bool cmp_matrix(size_t size, int **matrix_1, int **matrix_2)
     return true;
 }
 
+void matrix_multiply_simple(size_t size, int **matr_1, int **matr_2, int **matr_res)
+{
+    for (size_t i = 0; i < size; i++)
+    {
+        for (size_t j = 0; j < size; j++)
+        {
+            matr_res[i][j] = 0;
+        }
+    }
+
+    for (size_t i = 0; i < size; i++)
+    {
+        for (size_t j = 0; j < size; j++)
+        {
+            for (size_t k = 0; k < size; k++)
+            {
+                matr_res[i][j] += matr_1[i][k] * matr_2[k][j];
+            }
+        }
+    }
+}
+
+void matrix_multiply_transpose_opt(size_t size, int **matr_1, int **matr_2, int **matr_res)
+{
+    for (size_t i = 0; i < size; i++)
+    {
+        for (size_t j = 0; j < size; j++)
+        {
+            matr_res[i][j] = 0;
+        }
+    }
+
+    int **matr_tr = allocate_matrix(size);
+    for (size_t i = 0; i < size; i++)
+    {
+        for (size_t j = 0; j < size; j++)
+        {
+            matr_tr[i][j] = matr_2[j][i];
+            // std::swap(matr_2[i][j], matr_2[j][i]);
+        }
+    }
+
+    for (size_t i = 0; i < size; i++)
+    {
+        for (size_t j = 0; j < size; j++)
+        {
+            for (size_t k = 0; k < size; k++)
+            {
+                matr_res[i][j] += matr_1[i][k] * matr_tr[j][k];
+            }
+        }
+    }
+
+    free_matrix(matr_tr);
+}
+
+void matrix_multiply_block_opt(size_t size, size_t block_size, int **matr_1, int **matr_2, int **matr_res)
+{
+    for (size_t i = 0; i < size; i++)
+    {
+        for (size_t j = 0; j < size; j++)
+        {
+            matr_res[i][j] = 0;
+        }
+    }
+
+    for (size_t b_x = 0; b_x < size / block_size; b_x++)
+    {
+        for (size_t b_y = 0; b_y < size / block_size; b_y++)
+        {
+            for (size_t x = 0; x < block_size; x++)
+            {
+                for (size_t y = 0; y < block_size; y++)
+                {
+                    size_t i = b_x * block_size + x;
+                    size_t j = b_y * block_size + y;
+
+                    for (size_t k = 0; k < block_size; k++)
+                    {
+                        matr_res[i][j] += matr_1[i][k + b_y * block_size + k] * matr_2[b_x * block_size + k][j];
+                    }
+                }
+            }
+        }
+    }
+}
+
 int main()
 {
     const size_t SIZE = 512;
@@ -138,12 +143,16 @@ int main()
     int **matr_res = allocate_matrix(SIZE);
     int **matr_ref = allocate_matrix(SIZE);
 
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> dist(0, 100);
+
     for (size_t i = 0; i < SIZE; i++)
     {
         for (size_t j = 0; j < SIZE; j++)
         {
-            matr_1[i][j] = 1;
-            matr_2[i][j] = 1;
+            matr_1[i][j] = dist(gen);
+            matr_2[i][j] = dist(gen);
         }
     }
 
@@ -189,7 +198,22 @@ int main()
                   << std::endl;
     }
 
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        matrix_multiply_simple(SIZE, matr_1, matr_2, matr_res);
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+        print_matrix(SIZE, matr_res);
+        std::cerr << "Matrices "
+                  << SIZE << "X" << SIZE
+                  << " multiplied simple way"
+                  << ", success: " << std::boolalpha << cmp_matrix(SIZE, matr_ref, matr_res)
+                  << ", time: " << duration.count() / 1000000 << "." << std::setfill('0') << std::setw(6) << duration.count() % 1000000 << " seconds"
+                  << std::endl;
+    }
+
     free_matrix(matr_1);
     free_matrix(matr_2);
     free_matrix(matr_res);
+    free_matrix(matr_ref);
 }
