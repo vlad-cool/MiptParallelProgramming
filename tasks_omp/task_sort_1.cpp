@@ -13,7 +13,7 @@
 
 void quick_sort(int *array, size_t size)
 {
-    std::sort(array, array + size);
+    // std::sort(array, array + size);
     // std::cerr << size << std::endl;
     if (size <= 1)
     {
@@ -129,8 +129,6 @@ int main(int argc, char *argv[])
         enable_qs = true;
     }
 
-    auto start = std::chrono::high_resolution_clock::now();
-
     int *array = new int[size];
     int *buf = new int[size];
 
@@ -143,10 +141,18 @@ int main(int argc, char *argv[])
         array[i] = dist(gen);
     }
 
-    sort(array, buf, size, depth_threshold, enable_qs);
-    sort(array, buf, size, depth_threshold, enable_qs);
+    // sort(array, buf, size, depth_threshold, enable_qs);
+
     sort(array, buf, size, depth_threshold, enable_qs);
 
+    auto start = std::chrono::high_resolution_clock::now();
+#pragma omp parallel
+    {
+#pragma omp task
+        sort(array, buf, size, depth_threshold, enable_qs);
+#pragma omp taskwait
+    }
+    // sort(array, buf, size, depth_threshold, enable_qs);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
