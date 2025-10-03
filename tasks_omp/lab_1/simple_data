@@ -1,0 +1,13 @@
+Matrices 512X512 multiplied simple way, time: 0.222041 seconds
+Matrices 512X512 multiplied with transpose optimization, success: true, time: 0.050366 seconds
+Matrices 512X512 multiplied with block cache optimization, block size: 1, success: true, time: 0.242478 seconds
+Matrices 512X512 multiplied with block cache optimization, block size: 2, success: true, time: 0.097560 seconds
+Matrices 512X512 multiplied with block cache optimization, block size: 4, success: true, time: 0.074982 seconds
+Matrices 512X512 multiplied with block cache optimization, block size: 8, success: true, time: 0.068007 seconds
+Matrices 512X512 multiplied with block cache optimization, block size: 16, success: true, time: 0.076145 seconds
+Matrices 512X512 multiplied with block cache optimization, block size: 32, success: true, time: 0.172242 seconds
+Matrices 512X512 multiplied with block cache optimization, block size: 64, success: true, time: 0.199902 seconds
+Matrices 512X512 multiplied with block cache optimization, block size: 128, success: true, time: 0.203258 seconds
+Matrices 512X512 multiplied with block cache optimization, block size: 256, success: true, time: 0.233132 seconds
+Matrices 512X512 multiplied with block cache optimization, block size: 512, success: true, time: 0.226533 seconds
+Matrices 512X512 multiplied simple way, success: true, time: 0.230997 seconds

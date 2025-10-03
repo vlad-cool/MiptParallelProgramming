@@ -1,5 +1,5 @@
 CXX = mpicc
-CXXFLAGS = -Wall -O2
+CXXFLAGS = -Wall -O2 -Wextra -Werror=return-type
 SOURCES = $(wildcard task*/*.c)
 COMMON = $(wildcard common/*)
 TARGETS = $(SOURCES:.c=)

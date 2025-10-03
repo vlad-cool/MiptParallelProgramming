@@ -6,16 +6,48 @@
 #include <stack>
 #include <chrono>
 #include <omp.h>
+#include <algorithm>
 
 // #define BUBBLE_THRESHOLD 16
 #define BUBBLE_THRESHOLD 1
 
-// void sort(int *array, int *buf, size_t size, int depth_threshold, size_t buble_threshold)
-void sort(int *array, int *buf, size_t size, int depth_threshold)
+void quick_sort(int *array, size_t size)
 {
-    // if (size <= buble_threshold) {
-    //     for (size_t i = 0; i < size; i++) {
-    //         for (size_t k = 0; i + j < size; j++)
+    std::sort(array, array + size);
+    // std::cerr << size << std::endl;
+    if (size <= 1)
+    {
+        return;
+    }
+
+    size_t pivot = 0;
+
+    for (size_t i = 1; i < size; i++)
+    {
+        if (array[i] < array[pivot])
+        {
+            std::swap(array[i], array[pivot]);
+            pivot = i;
+        }
+    }
+
+    quick_sort(array, pivot);
+    quick_sort(array + pivot + 1, size - pivot - 1);
+}
+
+void sort(int *array, int *buf, size_t size, int depth_threshold, bool enable_qs)
+{
+    // if (size <= buble_threshold)
+    // {
+    //     for (size_t i = 0; i < size; i++)
+    //     {
+    //         for (size_t j = 1; j < i; j++)
+    //         {
+    //             if (array[i] > array[j])
+    //             {
+    //                 std::swap(array[i], array[j]);
+    //             }
+    //         }
     //     }
     // }
 
@@ -30,16 +62,23 @@ void sort(int *array, int *buf, size_t size, int depth_threshold)
 
     if (depth_threshold == 0)
     {
-#pragma omp task
-        sort(array, buf, size_1, 0);
-#pragma omp task
-        sort(array + size_1, buf + size_1, size_2, 0);
-#pragma omp taskwait
+        if (enable_qs)
+        {
+            quick_sort(array, size);
+        }
+        else
+        {
+            sort(array, buf, size_1, 0, enable_qs);
+            sort(array + size_1, buf + size_1, size_2, 0, enable_qs);
+        }
     }
     else
     {
-        sort(array, buf, size_1, depth_threshold - 1);
-        sort(array + size_1, buf + size_1, size_2, depth_threshold - 1);
+#pragma omp task
+        sort(array, buf, size_1, depth_threshold - 1, enable_qs);
+#pragma omp task
+        sort(array + size_1, buf + size_1, size_2, depth_threshold - 1, enable_qs);
+#pragma omp taskwait
     }
 
     size_t i_1 = 0, i_2 = size_1, i = 0;
@@ -83,6 +122,13 @@ int main(int argc, char *argv[])
     size_t size = atoi(argv[1]);
     int depth_threshold = atoi(argv[2]);
 
+    bool enable_qs = false;
+
+    if (argc > 3)
+    {
+        enable_qs = true;
+    }
+
     auto start = std::chrono::high_resolution_clock::now();
 
     int *array = new int[size];
@@ -97,7 +143,9 @@ int main(int argc, char *argv[])
         array[i] = dist(gen);
     }
 
-    sort(array, buf, size, depth_threshold);
+    sort(array, buf, size, depth_threshold, enable_qs);
+    sort(array, buf, size, depth_threshold, enable_qs);
+    sort(array, buf, size, depth_threshold, enable_qs);
 
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);

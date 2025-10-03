@@ -103,7 +103,7 @@ void matrix_multiply_transpose_opt(size_t size, int **matr_1, int **matr_2, int 
     free_matrix(matr_tr);
 }
 
-void matrix_multiply_block_opt(size_t size, size_t block_size, int **matr_1, int **matr_2, int **matr_res)
+void matrix_multiply_block_opt(const size_t size, const size_t block_size, int **matr_1, int **matr_2, int **matr_res)
 {
     for (size_t i = 0; i < size; i++)
     {
@@ -115,18 +115,22 @@ void matrix_multiply_block_opt(size_t size, size_t block_size, int **matr_1, int
 
     for (size_t b_x = 0; b_x < size / block_size; b_x++)
     {
-        for (size_t b_y = 0; b_y < size / block_size; b_y++)
+        for (size_t b_k = 0; b_k < size / block_size; b_k++)
         {
-            for (size_t x = 0; x < block_size; x++)
+            for (size_t b_y = 0; b_y < size / block_size; b_y++)
             {
-                for (size_t y = 0; y < block_size; y++)
+                for (size_t x = 0; x < block_size; x++)
                 {
-                    size_t i = b_x * block_size + x;
-                    size_t j = b_y * block_size + y;
-
-                    for (size_t k = 0; k < block_size; k++)
+                    for (size_t y = 0; y < block_size; y++)
                     {
-                        matr_res[i][j] += matr_1[i][k + b_y * block_size + k] * matr_2[b_x * block_size + k][j];
+                        size_t i = b_x * block_size + x;
+                        size_t j = b_y * block_size + y;
+
+                        for (size_t z = 0; z < block_size; z++)
+                        {
+                            size_t k = b_k * block_size + z;
+                            matr_res[i][j] += matr_1[i][k] * matr_2[k][j];
+                        }
                     }
                 }
             }
@@ -145,7 +149,7 @@ int main()
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> dist(0, 100);
+    std::uniform_int_distribution<int> dist(-100, 100);
 
     for (size_t i = 0; i < SIZE; i++)
     {
@@ -183,10 +187,10 @@ int main()
                   << std::endl;
     }
 
-    for (int block_size = 1; block_size <= 512; block_size *= 2)
+    for (size_t block_size = 1; block_size <= SIZE; block_size *= 2)
     {
         auto start = std::chrono::high_resolution_clock::now();
-        matrix_multiply_transpose_opt(SIZE, matr_1, matr_2, matr_res);
+        matrix_multiply_block_opt(SIZE, block_size, matr_1, matr_2, matr_res);
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
         print_matrix(SIZE, matr_res);
