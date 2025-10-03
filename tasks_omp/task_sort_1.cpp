@@ -10,8 +10,16 @@
 // #define BUBBLE_THRESHOLD 16
 #define BUBBLE_THRESHOLD 1
 
-void sort(int *array, int *buf, size_t size)
+// void sort(int *array, int *buf, size_t size, int depth_threshold, size_t buble_threshold)
+void sort(int *array, int *buf, size_t size, int depth_threshold)
 {
+    // if (size <= buble_threshold) {
+    //     for (size_t i = 0; i < size; i++) {
+    //         for (size_t k = 0; i + j < size; j++)
+    //     }
+    // }
+
+    // std::cout << depth_threshold << std::endl;
     if (size <= 1)
     {
         return;
@@ -20,11 +28,19 @@ void sort(int *array, int *buf, size_t size)
     size_t size_1 = size / 2;
     size_t size_2 = size - size_1;
 
+    if (depth_threshold == 0)
+    {
 #pragma omp task
-    sort(array, buf, size_1);
+        sort(array, buf, size_1, 0);
 #pragma omp task
-    sort(array + size_1, buf + size_1, size_2);
+        sort(array + size_1, buf + size_1, size_2, 0);
 #pragma omp taskwait
+    }
+    else
+    {
+        sort(array, buf, size_1, depth_threshold - 1);
+        sort(array + size_1, buf + size_1, size_2, depth_threshold - 1);
+    }
 
     size_t i_1 = 0, i_2 = size_1, i = 0;
 
@@ -58,13 +74,14 @@ void sort(int *array, int *buf, size_t size)
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2)
+    if (argc < 3)
     {
-        std::cout << "No numbers number provided" << std::endl;
+        std::cout << "Usage: " << argv[1] << " N DEPTH_THRESHOLD" << std::endl;
         return 1;
     }
 
     size_t size = atoi(argv[1]);
+    int depth_threshold = atoi(argv[2]);
 
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -80,15 +97,17 @@ int main(int argc, char *argv[])
         array[i] = dist(gen);
     }
 
-    sort(array, buf, size);
+    sort(array, buf, size, depth_threshold);
 
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
-    bool success = true; 
+    bool success = true;
 
-    for (size_t i = 1; i < size; i++) {
-        if (array[i - 1] > array[i]) {
+    for (size_t i = 1; i < size; i++)
+    {
+        if (array[i - 1] > array[i])
+        {
             success = false;
         }
     }
