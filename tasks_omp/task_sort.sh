@@ -13,10 +13,11 @@ rm -f task_sort_1.csv task_sort_2.csv task_sort_3.csv
 for i in {0..16}; do 
     echo -n "$i, " >> task_sort_1.csv
     ./task_sort_1 4000000 $i | grep -oP '\d+\.\d+(?= seconds)' >> task_sort_1.csv
+done
+
+for i in {8..16}; do 
     echo -n "$i, " >> task_sort_2.csv
     ./task_sort_1 4000000 $i a | grep -oP '\d+\.\d+(?= seconds)' >> task_sort_2.csv
-    # echo -n "$i, " >> task_sort_3.csv
-    # ./task_sort_1 4000000 $i 4 | grep -oP '\d+\.\d+(?= seconds)' >> task_sort_3.csv
 done
 
 ./task_sort.gp

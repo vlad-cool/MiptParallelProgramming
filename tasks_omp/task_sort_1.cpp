@@ -8,32 +8,65 @@
 #include <omp.h>
 #include <algorithm>
 
-// #define BUBBLE_THRESHOLD 16
-#define BUBBLE_THRESHOLD 1
-
-void quick_sort(int *array, size_t size)
+void swap(int *a, int *b)
 {
-    // std::sort(array, array + size);
-    // std::cerr << size << std::endl;
-    if (size <= 1)
-    {
-        return;
-    }
+    int c = *a;
+    *a = *b;
+    *b = c;
+}
 
-    size_t pivot = 0;
+void sort(int *array, size_t size)
+{
+    bool sorted = false;
+    ssize_t distance = size;
 
-    for (size_t i = 1; i < size; i++)
+    while (!sorted || distance > 1)
     {
-        if (array[i] < array[pivot])
+        distance = distance * 2 / 3;
+        if (distance < 1)
         {
-            std::swap(array[i], array[pivot]);
-            pivot = i;
+            distance = 1;
+        }
+
+        sorted = true;
+        for (ssize_t i = 0; i + distance < size; i++)
+        {
+            if (array[i] > array[i + distance])
+            {
+                sorted = false;
+                swap(array + i, array + i + distance);
+            }
         }
     }
-
-    quick_sort(array, pivot);
-    quick_sort(array + pivot + 1, size - pivot - 1);
 }
+
+// // #define BUBBLE_THRESHOLD 16
+// #define BUBBLE_THRESHOLD 1
+
+// void quick_sort(int *array, size_t size)
+// {
+//     // std::sort(array, array + size);
+//     // std::cerr << size << std::endl;
+//     if (size <= 1)
+//     {
+//         return;
+//     }
+
+//     size_t pivot = 0;
+
+//     for (size_t i = 1; i < size; i++)
+//     {
+//         if (array[i] < array[pivot])
+//         {
+//             std::swap(array[i], array[pivot]);
+//             std::swap(array[pivot + 1], array[i]);
+//             pivot++;
+//         }
+//     }
+
+//     quick_sort(array, pivot);
+//     quick_sort(array + pivot + 1, size - pivot - 1);
+// }
 
 void sort(int *array, int *buf, size_t size, int depth_threshold, bool enable_qs)
 {
@@ -64,7 +97,7 @@ void sort(int *array, int *buf, size_t size, int depth_threshold, bool enable_qs
     {
         if (enable_qs)
         {
-            quick_sort(array, size);
+            sort(array, size);
         }
         else
         {

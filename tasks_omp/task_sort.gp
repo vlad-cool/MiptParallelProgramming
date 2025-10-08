@@ -7,4 +7,4 @@ set ylabel "Time, s" offset 1,0
 set output "task_sort_1.png"
 
 plot "task_sort_1.csv" with lines title "Merge sort",  \
-    "task_sort_2.csv" with lines title "Merge sort + quick sort"
+    "task_sort_2.csv" with lines title "Merge sort + comb sort"
