@@ -21,3 +21,4 @@ tasks_omp/task_balancing
 .vscode/
 tasks_omp/lab_1/simple
 tasks_omp/task_sort_1
+tasks_omp/task_sort_2
