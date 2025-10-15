@@ -20,42 +20,54 @@ void print_m256i(__m256i n)
     std::cout << "\n";
 }
 
-const int perm_1_a[8] = {7, 0, 1, 2, 3, 4, 5, 6};
-const __m256i perm_1 = _mm256_loadu_si256((__m256i *)perm_1_a);
-
-const int mask_1_a[8] = {-1, 0, 0, 0, 0, 0, 0, 0};
-const __m256i mask_1 = _mm256_loadu_si256((__m256i *)mask_1_a);
+__m256i sort_8_step(__m256i a, __m256i perm, __m256i perm_1)
+{
+    __m256i b = _mm256_permutevar8x32_epi32(a, perm);
+    __m256i mask_1 = _mm256_cmpgt_epi32(a, b);
+    __m256i mask_2 = _mm256_permutevar8x32_epi32(mask_1, perm_1);
+    return _mm256_or_si256(_mm256_andnot_si256(mask_2, a), _mm256_and_si256(mask_2, b));
+}
 
 void sort_8(__int32_t *arr)
 {
     __m256i a = _mm256_loadu_si256((__m256i *)arr);
-    __m256i b = _mm256_loadu_si256((__m256i *)arr);
-    __m256i permutation = _mm256_setzero_si256();
 
-    for (int i = 0; i < 7; i++)
-    {
-        b = _mm256_permutevar8x32_epi32(b, perm_1);
-        __m256i res = _mm256_cmpgt_epi32(a, b);
-        permutation = _mm256_sub_epi32(permutation, res);
-        const __m256i c = _mm256_setr_epi32(-1, 0, 1, 2, 3, 4, 5, 6);
-        __m256i d = _mm256_set1_epi32(i);
-        __m256i mask = _mm256_cmpgt_epi32(d, c);
-        res = _mm256_cmpeq_epi32(a, b);
-        res = _mm256_and_si256(res, mask);
-        permutation = _mm256_sub_epi32(permutation, res);
-    }
+    a = sort_8_step(a, _mm256_setr_epi32(1, 0, 2, 3, 4, 5, 6, 7), _mm256_setr_epi32(0, 0, 2, 3, 4, 5, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 2, 1, 3, 4, 5, 6, 7), _mm256_setr_epi32(0, 1, 1, 3, 4, 5, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 1, 3, 2, 4, 5, 6, 7), _mm256_setr_epi32(0, 1, 2, 2, 4, 5, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 1, 2, 4, 3, 5, 6, 7), _mm256_setr_epi32(0, 1, 2, 3, 3, 5, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 1, 2, 3, 5, 4, 6, 7), _mm256_setr_epi32(0, 1, 2, 3, 4, 4, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 1, 2, 3, 4, 6, 5, 7), _mm256_setr_epi32(0, 1, 2, 3, 4, 5, 5, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 1, 2, 3, 4, 6, 7, 6), _mm256_setr_epi32(0, 1, 2, 3, 4, 5, 6, 6));
 
-    alignas(32) __int32_t arr_1[8];
-    alignas(32) __int32_t perm[8];
-    _mm256_storeu_si256((__m256i *)arr_1, permutation);
-    for (int i = 0; i < 8; i++)
-    {
-        perm[arr_1[i]] = i;
-    }
-    permutation = _mm256_loadu_si256((__m256i *)perm);
+    a = sort_8_step(a, _mm256_setr_epi32(1, 0, 2, 3, 4, 5, 6, 7), _mm256_setr_epi32(0, 0, 2, 3, 4, 5, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 2, 1, 3, 4, 5, 6, 7), _mm256_setr_epi32(0, 1, 1, 3, 4, 5, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 1, 3, 2, 4, 5, 6, 7), _mm256_setr_epi32(0, 1, 2, 2, 4, 5, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 1, 2, 4, 3, 5, 6, 7), _mm256_setr_epi32(0, 1, 2, 3, 3, 5, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 1, 2, 3, 5, 4, 6, 7), _mm256_setr_epi32(0, 1, 2, 3, 4, 4, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 1, 2, 3, 4, 6, 5, 7), _mm256_setr_epi32(0, 1, 2, 3, 4, 5, 5, 7));
 
-    __m256i res = _mm256_permutevar8x32_epi32(a, permutation);
-    _mm256_storeu_si256((__m256i *)arr, res);
+    a = sort_8_step(a, _mm256_setr_epi32(1, 0, 2, 3, 4, 5, 6, 7), _mm256_setr_epi32(0, 0, 2, 3, 4, 5, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 2, 1, 3, 4, 5, 6, 7), _mm256_setr_epi32(0, 1, 1, 3, 4, 5, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 1, 3, 2, 4, 5, 6, 7), _mm256_setr_epi32(0, 1, 2, 2, 4, 5, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 1, 2, 4, 3, 5, 6, 7), _mm256_setr_epi32(0, 1, 2, 3, 3, 5, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 1, 2, 3, 5, 4, 6, 7), _mm256_setr_epi32(0, 1, 2, 3, 4, 4, 6, 7));
+
+    a = sort_8_step(a, _mm256_setr_epi32(1, 0, 2, 3, 4, 5, 6, 7), _mm256_setr_epi32(0, 0, 2, 3, 4, 5, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 2, 1, 3, 4, 5, 6, 7), _mm256_setr_epi32(0, 1, 1, 3, 4, 5, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 1, 3, 2, 4, 5, 6, 7), _mm256_setr_epi32(0, 1, 2, 2, 4, 5, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 1, 2, 4, 3, 5, 6, 7), _mm256_setr_epi32(0, 1, 2, 3, 3, 5, 6, 7));
+
+    a = sort_8_step(a, _mm256_setr_epi32(1, 0, 2, 3, 4, 5, 6, 7), _mm256_setr_epi32(0, 0, 2, 3, 4, 5, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 2, 1, 3, 4, 5, 6, 7), _mm256_setr_epi32(0, 1, 1, 3, 4, 5, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 1, 3, 2, 4, 5, 6, 7), _mm256_setr_epi32(0, 1, 2, 2, 4, 5, 6, 7));
+
+    a = sort_8_step(a, _mm256_setr_epi32(1, 0, 2, 3, 4, 5, 6, 7), _mm256_setr_epi32(0, 0, 2, 3, 4, 5, 6, 7));
+    a = sort_8_step(a, _mm256_setr_epi32(0, 2, 1, 3, 4, 5, 6, 7), _mm256_setr_epi32(0, 1, 1, 3, 4, 5, 6, 7));
+
+    a = sort_8_step(a, _mm256_setr_epi32(1, 0, 2, 3, 4, 5, 6, 7), _mm256_setr_epi32(0, 0, 2, 3, 4, 5, 6, 7));
+
+    _mm256_storeu_si256((__m256i *)arr, a);
 }
 
 bool merge_sort(__int32_t *arr, __int32_t *buf, size_t size)
@@ -150,14 +162,16 @@ int main()
 
         __int32_t *buf = new int32_t[size];
         bool res = merge_sort(array, buf, size);
-        if (!res) {
+        if (!res)
+        {
             delete[] array;
             array = buf;
         }
-        else {
+        else
+        {
             delete[] buf;
         }
-        
+
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
         std::cerr << "Sorted using merge + simd " << size << " numbers in " << duration.count() / 1000000 << "." << std::setfill('0') << std::setw(6) << duration.count() % 1000000 << " seconds" << std::endl;
@@ -165,7 +179,6 @@ int main()
         start = std::chrono::high_resolution_clock::now();
 
         std::sort(array_ref, array_ref + size);
-
 
         end = std::chrono::high_resolution_clock::now();
         duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
@@ -178,7 +191,7 @@ int main()
         }
         for (size_t i = 0; i < size; i++)
         {
-            std::cout << array[i] << " " << array_ref[i] << std::endl;
+            // std::cout << array[i] << " " << array_ref[i] << std::endl;
             // assert(array[i] == array_ref[i]);
         }
     }
