@@ -9,13 +9,14 @@ int main(int argc, char *argv[])
     volatile int active = 0;
 #pragma omp parallel
     {
-        while (active != omp_get_thread_num())
+        int num_thread = omp_get_thread_num();
+        while (active != num_thread)
         {
         }
 
         var += 1;
         var *= 2;
-        std::cout << omp_get_thread_num() << " " << var << std::endl;
+        std::cout << num_thread << " " << var << std::endl;
         active++;
     }
 }
