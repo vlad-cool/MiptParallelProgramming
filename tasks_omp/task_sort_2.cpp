@@ -165,7 +165,7 @@ int main()
         if (!res)
         {
             delete[] array;
-            array = buf;
+            array = buf;   
         }
         else
         {

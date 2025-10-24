@@ -29,7 +29,7 @@ void sort(int *array, size_t size)
         }
 
         sorted = true;
-        for (ssize_t i = 0; i + distance < size; i++)
+        for (size_t i = 0; i + distance < size; i++)
         {
             if (array[i] > array[i + distance])
             {

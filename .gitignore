@@ -23,3 +23,7 @@ tasks_omp/lab_1/simple
 tasks_omp/task_sort_1
 tasks_omp/task_sort_2
 tasks_omp/task_0_3
+tasks_omp/task_dev_avg
+tasks_omp_devices/bin/dot_prod
+tasks_omp_devices/bin/task_avg
+tasks_omp_devices/bin/test

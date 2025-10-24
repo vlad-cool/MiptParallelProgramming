@@ -1,11 +1,11 @@
 CXX = mpicc
-CXXFLAGS = -Wall -O2 -Wextra -Werror=return-type
+CXXFLAGS = -Wall -O3 -Wextra -Werror=return-type
 SOURCES = $(wildcard task*/*.c)
 COMMON = $(wildcard common/*)
 TARGETS = $(SOURCES:.c=)
 
 OPENMP_CPPXX = g++
-OPENMP_CPPXXFLAGS = -Wall -O2 -fopenmp -lomp
+OPENMP_CPPXXFLAGS = -Wall -O3 -fopenmp -lomp
 OPENMP_SOURCES = $(wildcard tasks_omp/*.cpp)
 OPENMP_TARGETS = $(OPENMP_SOURCES:.cpp=)
 
