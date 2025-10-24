@@ -33,7 +33,7 @@ int main()
         std::cout << omp_get_uid_from_device(i) << std::endl;
     }
 
-    size_t size = 1024 * 1024 * 1024;
+    size_t size = 1024 * 1024 * 256;
 
     float *a = new float[size];
 

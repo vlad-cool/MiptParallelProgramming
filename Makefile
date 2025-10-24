@@ -5,7 +5,7 @@ COMMON = $(wildcard common/*)
 TARGETS = $(SOURCES:.c=)
 
 OPENMP_CPPXX = g++
-OPENMP_CPPXXFLAGS = -Wall -O3 -fopenmp -lomp
+OPENMP_CPPXXFLAGS = -Wall -O3 -fopenmp -lomp -Wextra -Werror=return-type
 OPENMP_SOURCES = $(wildcard tasks_omp/*.cpp)
 OPENMP_TARGETS = $(OPENMP_SOURCES:.cpp=)
 

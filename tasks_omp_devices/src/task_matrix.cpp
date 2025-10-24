@@ -141,12 +141,12 @@ void matrix_multiply_block_opt(const size_t size, const size_t block_size, int *
 void matrix_multiply_omp(const size_t size, int **matr_a, int **matr_b, int **matr_res)
 {
 #pragma omp parallel for collapse(2)
-    for (int i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
     {
-        for (int j = 0; j < size; j++)
+        for (size_t j = 0; j < size; j++)
         {
             int tmp_res = 0;
-            for (int k = 0; k < size; k++)
+            for (size_t k = 0; k < size; k++)
             {
                 tmp_res += matr_a[i][k] * matr_b[k][j];
             }
@@ -163,12 +163,12 @@ void matrix_multiply_dev(const size_t size, int **matr_a, int **matr_b, int **ma
 
 #pragma omp target map(to : matr_a_0[ : size * size]) map(to : matr_b_0[ : size * size]) map(tofrom : matr_res_0[ : size * size])
 #pragma omp teams distribute parallel for collapse(2)
-    for (int i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
     {
-        for (int j = 0; j < size; j++)
+        for (size_t j = 0; j < size; j++)
         {
             int tmp_res = 0;
-            for (int k = 0; k < size; k++)
+            for (size_t k = 0; k < size; k++)
             {
                 tmp_res += matr_a_0[i * size + k] * matr_b_0[k * size + j];
             }
@@ -195,12 +195,12 @@ void matrix_multiply_dev_tr(const size_t size, int **matr_a, int **matr_b, int *
 
 #pragma omp target map(to : matr_a_0[ : size * size]) map(to : matr_b_0[ : size * size]) map(tofrom : matr_res_0[ : size * size])
 #pragma omp teams distribute parallel for collapse(2)
-    for (int i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
     {
-        for (int j = 0; j < size; j++)
+        for (size_t j = 0; j < size; j++)
         {
             int tmp_res = 0;
-            for (int k = 0; k < size; k++)
+            for (size_t k = 0; k < size; k++)
             {
                 tmp_res += matr_a_0[i * size + k] * matr_b_0[j * size + k];
             }

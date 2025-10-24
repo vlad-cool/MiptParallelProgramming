@@ -1,0 +1,2 @@
+Computer average of 1048576 floats on gpu in 0.003361 seconds, result is 10.0182
+Computer average of 1048576 floats on cpu in 0.005108 seconds, result is 10.0182
