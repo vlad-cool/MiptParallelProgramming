@@ -27,3 +27,4 @@ tasks_omp/task_dev_avg
 tasks_omp_devices/bin/dot_prod
 tasks_omp_devices/bin/task_avg
 tasks_omp_devices/bin/test
+tasks_omp_devices/bin/task_matrix

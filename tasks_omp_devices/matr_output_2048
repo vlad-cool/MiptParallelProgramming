@@ -1,0 +1,14 @@
+Matrices 2048X2048 multiplied simple way, time: 41.892154 seconds
+Matrices 2048X2048 multiplied using omp, success: true, time: 3.268667 seconds
+Matrices 2048X2048 multiplied on gpu, success: true, time: 2.366777 seconds
+Matrices 2048X2048 multiplied on gpu with transpose optimization, success: true, time: 0.700511 seconds
+Matrices 2048X2048 multiplied with transpose optimization, success: true, time: 3.436505 seconds
+Matrices 2048X2048 multiplied with block cache optimization, block size: 1, success: true, time: 16.203101 seconds
+Matrices 2048X2048 multiplied with block cache optimization, block size: 2, success: true, time: 7.172327 seconds
+Matrices 2048X2048 multiplied with block cache optimization, block size: 4, success: true, time: 5.029866 seconds
+Matrices 2048X2048 multiplied with block cache optimization, block size: 8, success: true, time: 6.088802 seconds
+Matrices 2048X2048 multiplied with block cache optimization, block size: 16, success: true, time: 14.210554 seconds
+Matrices 2048X2048 multiplied with block cache optimization, block size: 32, success: true, time: 20.453223 seconds
+Matrices 2048X2048 multiplied with block cache optimization, block size: 64, success: true, time: 23.345558 seconds
+Matrices 2048X2048 multiplied with block cache optimization, block size: 128, success: true, time: 29.366753 seconds
+Matrices 2048X2048 multiplied with block cache optimization, block size: 256, success: true, time: 35.384371 seconds
