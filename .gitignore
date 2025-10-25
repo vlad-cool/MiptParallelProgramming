@@ -1,5 +1,5 @@
+.vscode/
 scripts/ssh_info
-.vscode/settings.json
 tasks/task_e/test
 tasks/task_e/main
 tasks/task_1_1
@@ -14,17 +14,5 @@ tasks/task_gol/bin/
 tasks/task_sort/bin/
 tasks/lab_1/bin/
 tasks/lab_2/bin/
-tasks_omp/task_0_1
-tasks_omp/task_0_2
-tasks_omp/task_nested
-tasks_omp/task_balancing
-.vscode/
-tasks_omp/lab_1/simple
-tasks_omp/task_sort_1
-tasks_omp/task_sort_2
-tasks_omp/task_0_3
-tasks_omp/task_dev_avg
-tasks_omp_devices/bin/dot_prod
-tasks_omp_devices/bin/task_avg
-tasks_omp_devices/bin/test
-tasks_omp_devices/bin/task_matrix
+tasks_omp/bin/*
+tasks_omp_devices/bin/*

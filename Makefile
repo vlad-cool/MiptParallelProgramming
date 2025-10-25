@@ -4,14 +4,11 @@ SOURCES = $(wildcard task*/*.c)
 COMMON = $(wildcard common/*)
 TARGETS = $(SOURCES:.c=)
 
-OPENMP_CPPXX = g++
-OPENMP_CPPXXFLAGS = -Wall -O3 -fopenmp -lomp -Wextra -Werror=return-type
-OPENMP_SOURCES = $(wildcard tasks_omp/*.cpp)
-OPENMP_TARGETS = $(OPENMP_SOURCES:.cpp=)
-
 .PHONY: clean all
 
 all: $(TARGETS) $(OPENMP_TARGETS)
+	cd tasks_omp && make
+	cd tasks_omp_devices && make
 
 %: %.c $(COMMON)
 	$(CXX) $(CXXFLAGS) -o $@ $<
@@ -21,3 +18,5 @@ all: $(TARGETS) $(OPENMP_TARGETS)
 
 clean:
 	rm -f $(TARGETS) $(OPENMP_TARGETS)
+	cd tasks_omp && make clean
+	cd tasks_omp_devices && make clean

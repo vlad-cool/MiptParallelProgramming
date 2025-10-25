@@ -17,7 +17,7 @@ void print_info()
     std::cout << s.str();
 }
 
-int main(int argc, char *argv[])
+int main()
 {
     // omp_set_num_threads(3);
     omp_set_max_active_levels(5);

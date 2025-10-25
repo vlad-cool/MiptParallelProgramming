@@ -2,7 +2,7 @@
 #include <sstream>
 #include <omp.h>
 
-int main(int argc, char *argv[])
+int main()
 {
 #pragma omp parallel
     {

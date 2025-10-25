@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -fopenmp -foffload=nvptx-none -O3 -Wextra -Werror=return-type
+CXXFLAGS = -Wall -O3 -fopenmp -lomp -Wextra -Werror=return-type
 
 SOURCES = $(wildcard src/*.cpp)
 TARGETS = $(addprefix bin/, $(SOURCES:src/%.cpp=%))
@@ -13,4 +13,4 @@ bin/%: src/%.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $<
 
 clean:
-	rm -f rm -f bin/*
+	rm -f bin/*

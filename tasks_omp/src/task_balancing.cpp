@@ -3,7 +3,7 @@
 #include <vector>
 #include <omp.h>
 
-int main(int argc, char *argv[])
+int main()
 {
     omp_set_num_threads(4);
 

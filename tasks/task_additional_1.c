@@ -34,8 +34,6 @@ int main(int argc, char *argv[])
 
         switch (send_type)
         {
-        default:
-            printf("Unknown type of sender, using MPI_SEND(...)\b");
         case 0:
             printf("MPI_Send ");
             MPI_Send(buf, buf_size, MPI_INT, 1, 0, MPI_COMM_WORLD);
@@ -52,6 +50,8 @@ int main(int argc, char *argv[])
             printf("MPI_Bsend");
             MPI_Bsend(buf, buf_size, MPI_INT, 1, 0, MPI_COMM_WORLD);
             break;
+        default:
+            printf("Unknown type of sender, using MPI_SEND(...)\b");
         }
         clock_gettime(CLOCK_MONOTONIC, &t_end);
 

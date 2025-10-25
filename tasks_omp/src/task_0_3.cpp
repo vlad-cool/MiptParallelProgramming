@@ -3,7 +3,7 @@
 #include <vector>
 #include <omp.h>
 
-int main(int argc, char *argv[])
+int main()
 {
     int var = 0;
     volatile int active = 0;
