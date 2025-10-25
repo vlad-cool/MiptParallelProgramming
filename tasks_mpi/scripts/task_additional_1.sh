@@ -3,6 +3,7 @@
 SCRIPT_DIR=$(realpath $(dirname $0))
 cd $SCRIPT_DIR
 
+
 rm -f task_additional_1_out
 
 mpirun -np 2 ~/parallel_programming/tasks/task_additional_1 0 1     #  >> task_additional_1_out
