@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <chrono>
 #include <random>
+#include <functional>
 
 int **allocate_matrix(size_t size)
 {
@@ -138,40 +139,16 @@ void matrix_multiply_block_opt(const size_t size, const size_t block_size, int *
     }
 }
 
-void matrix_multiply_stras(const size_t size, int **matr_1, int **matr_2, int **matr_res)
+void matrix_multiply_stras(const size_t size, int **matr_1, int **matr_2, int **matr_res, size_t threshold = 8)
 {
-    if (size == 1)
+    if (size <= threshold)
     {
-        **matr_res = **matr_1 * **matr_2;
+        matrix_multiply_transpose_opt(size, matr_1, matr_2, matr_res);
         return;
     }
 
-    int **A_1_1 = allocate_matrix(size / 2);
-    int **A_1_2 = allocate_matrix(size / 2);
-    int **A_2_1 = allocate_matrix(size / 2);
-    int **A_2_2 = allocate_matrix(size / 2);
-
-    int **B_1_1 = allocate_matrix(size / 2);
-    int **B_1_2 = allocate_matrix(size / 2);
-    int **B_2_1 = allocate_matrix(size / 2);
-    int **B_2_2 = allocate_matrix(size / 2);
-
-    for (size_t i = 0; i < size / 2; i++)
-    {
-        for (size_t j = 0; j < size / 2; j++)
-        {
-
-            A_1_1[i][j] = matr_1[i][j];
-            A_1_2[i][j] = matr_1[i][j + size / 2];
-            A_2_1[i][j] = matr_1[i + size / 2][j];
-            A_2_2[i][j] = matr_1[i + size / 2][j + size / 2];
-
-            B_1_1[i][j] = matr_2[i][j];
-            B_1_2[i][j] = matr_2[i][j + size / 2];
-            B_2_1[i][j] = matr_2[i + size / 2][j];
-            B_2_2[i][j] = matr_2[i + size / 2][j + size / 2];
-        }
-    }
+    int **A = matr_1;
+    int **B = matr_2;
 
     int **tmp = allocate_matrix(size / 2);
     int **tmp_L = allocate_matrix(size / 2);
@@ -181,8 +158,8 @@ void matrix_multiply_stras(const size_t size, int **matr_1, int **matr_2, int **
     {
         for (size_t j = 0; j < size / 2; j++)
         {
-            tmp_L[i][j] = A_1_1[i][j] + A_2_2[i][j];
-            tmp_R[i][j] = B_1_1[i][j] + B_2_2[i][j];
+            tmp_L[i][j] = A[i][j] + A[i + size / 2][j + size / 2];
+            tmp_R[i][j] = B[i][j] + B[i + size / 2][j + size / 2];
         }
     }
     matrix_multiply_stras(size / 2, tmp_L, tmp_R, tmp);
@@ -199,8 +176,8 @@ void matrix_multiply_stras(const size_t size, int **matr_1, int **matr_2, int **
     {
         for (size_t j = 0; j < size / 2; j++)
         {
-            tmp_L[i][j] = A_1_2[i][j] - A_2_2[i][j];
-            tmp_R[i][j] = B_2_1[i][j] + B_2_2[i][j];
+            tmp_L[i][j] = A[i][j + size / 2] - A[i + size / 2][j + size / 2];
+            tmp_R[i][j] = B[i + size / 2][j] + B[i + size / 2][j + size / 2];
         }
     }
     matrix_multiply_stras(size / 2, tmp_L, tmp_R, tmp);
@@ -216,8 +193,8 @@ void matrix_multiply_stras(const size_t size, int **matr_1, int **matr_2, int **
     {
         for (size_t j = 0; j < size / 2; j++)
         {
-            tmp_L[i][j] = A_2_1[i][j] - A_1_1[i][j];
-            tmp_R[i][j] = B_1_1[i][j] + B_1_2[i][j];
+            tmp_L[i][j] = A[i + size / 2][j] - A[i][j];
+            tmp_R[i][j] = B[i][j] + B[i][j + size / 2];
         }
     }
     matrix_multiply_stras(size / 2, tmp_L, tmp_R, tmp);
@@ -233,10 +210,11 @@ void matrix_multiply_stras(const size_t size, int **matr_1, int **matr_2, int **
     {
         for (size_t j = 0; j < size / 2; j++)
         {
-            tmp_L[i][j] = A_1_1[i][j] + A_1_2[i][j];
+            tmp_L[i][j] = A[i][j] + A[i][j + size / 2];
+            tmp_R[i][j] = B[i + size / 2][j + size / 2];
         }
     }
-    matrix_multiply_stras(size / 2, tmp_L, B_2_2, tmp);
+    matrix_multiply_stras(size / 2, tmp_L, tmp_R, tmp);
     for (size_t i = 0; i < size / 2; i++)
     {
         for (size_t j = 0; j < size / 2; j++)
@@ -250,10 +228,11 @@ void matrix_multiply_stras(const size_t size, int **matr_1, int **matr_2, int **
     {
         for (size_t j = 0; j < size / 2; j++)
         {
-            tmp_L[i][j] = A_2_1[i][j] + A_2_2[i][j];
+            tmp_L[i][j] = A[i + size / 2][j] + A[i + size / 2][j + size / 2];
+            tmp_R[i][j] = B[i][j];
         }
     }
-    matrix_multiply_stras(size / 2, tmp_L, B_1_1, tmp);
+    matrix_multiply_stras(size / 2, tmp_L, tmp_R, tmp);
     for (size_t i = 0; i < size / 2; i++)
     {
         for (size_t j = 0; j < size / 2; j++)
@@ -267,10 +246,11 @@ void matrix_multiply_stras(const size_t size, int **matr_1, int **matr_2, int **
     {
         for (size_t j = 0; j < size / 2; j++)
         {
-            tmp_R[i][j] = B_2_1[i][j] - B_1_1[i][j];
+            tmp_L[i][j] = A[i + size / 2][j + size / 2];
+            tmp_R[i][j] = B[i + size / 2][j] - B[i][j];
         }
     }
-    matrix_multiply_stras(size / 2, A_2_2, tmp_R, tmp);
+    matrix_multiply_stras(size / 2, tmp_L, tmp_R, tmp);
     for (size_t i = 0; i < size / 2; i++)
     {
         for (size_t j = 0; j < size / 2; j++)
@@ -284,10 +264,11 @@ void matrix_multiply_stras(const size_t size, int **matr_1, int **matr_2, int **
     {
         for (size_t j = 0; j < size / 2; j++)
         {
-            tmp_R[i][j] = B_1_2[i][j] - B_2_2[i][j];
+            tmp_L[i][j] = A[i][j];
+            tmp_R[i][j] = B[i][j + size / 2] - B[i + size / 2][j + size / 2];
         }
     }
-    matrix_multiply_stras(size / 2, A_1_1, tmp_R, tmp);
+    matrix_multiply_stras(size / 2, tmp_L, tmp_R, tmp);
     for (size_t i = 0; i < size / 2; i++)
     {
         for (size_t j = 0; j < size / 2; j++)
@@ -302,100 +283,273 @@ void matrix_multiply_stras(const size_t size, int **matr_1, int **matr_2, int **
     free_matrix(tmp_R);
 }
 
-int main()
+void matrix_multiply_transpose_opt_omp(size_t size, int **matr_1, int **matr_2, int **matr_res)
 {
-    const size_t SIZE = 512;
-
-    int **matr_1 = allocate_matrix(SIZE);
-    int **matr_2 = allocate_matrix(SIZE);
-    int **matr_res = allocate_matrix(SIZE);
-    int **matr_ref = allocate_matrix(SIZE);
-
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> dist(-100, 100);
-
-    for (size_t i = 0; i < SIZE; i++)
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < size; i++)
     {
-        for (size_t j = 0; j < SIZE; j++)
+        for (size_t j = 0; j < size; j++)
         {
-            matr_1[i][j] = dist(gen);
-            matr_2[i][j] = dist(gen);
+            matr_res[i][j] = 0;
         }
     }
 
-    // CACHE PREHEAT
-    matrix_multiply_simple(SIZE, matr_1, matr_2, matr_ref);
-    matrix_multiply_simple(SIZE, matr_1, matr_2, matr_ref);
-    matrix_multiply_simple(SIZE, matr_1, matr_2, matr_ref);
+    int **matr_tr = allocate_matrix(size);
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < size; i++)
     {
-        auto start = std::chrono::high_resolution_clock::now();
-        matrix_multiply_simple(SIZE, matr_1, matr_2, matr_ref);
-        auto end = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-        print_matrix(SIZE, matr_ref);
-        std::cerr << "Matrices " << SIZE << "X" << SIZE << " multiplied simple way, time: " << duration.count() / 1000000 << "." << std::setfill('0') << std::setw(6) << duration.count() % 1000000 << " seconds" << std::endl;
+        for (size_t j = 0; j < size; j++)
+        {
+            matr_tr[i][j] = matr_2[j][i];
+            // std::swap(matr_2[i][j], matr_2[j][i]);
+        }
     }
 
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < size; i++)
     {
-        auto start = std::chrono::high_resolution_clock::now();
-        matrix_multiply_transpose_opt(SIZE, matr_1, matr_2, matr_res);
-        auto end = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-        print_matrix(SIZE, matr_res);
-        std::cerr << "Matrices "
-                  << SIZE << "X" << SIZE
-                  << " multiplied with transpose optimization"
-                  << ", success: " << std::boolalpha << cmp_matrix(SIZE, matr_ref, matr_res)
-                  << ", time: " << duration.count() / 1000000 << "." << std::setfill('0') << std::setw(6) << duration.count() % 1000000 << " seconds"
-                  << std::endl;
+        for (size_t j = 0; j < size; j++)
+        {
+            for (size_t k = 0; k < size; k++)
+            {
+                matr_res[i][j] += matr_1[i][k] * matr_tr[j][k];
+            }
+        }
     }
 
-    for (size_t block_size = 1; block_size <= SIZE; block_size *= 2)
+    free_matrix(matr_tr);
+}
+
+void matrix_multiply_stras_omp(const size_t size, int **matr_1, int **matr_2, int **matr_res, size_t threshold = 8)
+{
+    if (size <= threshold)
     {
-        auto start = std::chrono::high_resolution_clock::now();
-        matrix_multiply_block_opt(SIZE, block_size, matr_1, matr_2, matr_res);
-        auto end = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-        print_matrix(SIZE, matr_res);
-        std::cerr << "Matrices "
-                  << SIZE << "X" << SIZE
-                  << " multiplied with block cache optimization, block size: " << block_size
-                  << ", success: " << std::boolalpha << cmp_matrix(SIZE, matr_ref, matr_res)
-                  << ", time: " << duration.count() / 1000000 << "." << std::setfill('0') << std::setw(6) << duration.count() % 1000000 << " seconds"
-                  << std::endl;
+        matrix_multiply_transpose_opt(size, matr_1, matr_2, matr_res);
+        return;
     }
 
+    int **A = matr_1;
+    int **B = matr_2;
+
+    int **tmp = allocate_matrix(size / 2);
+    int **tmp_L = allocate_matrix(size / 2);
+    int **tmp_R = allocate_matrix(size / 2);
+
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < size / 2; i++)
     {
-        auto start = std::chrono::high_resolution_clock::now();
-        matrix_multiply_simple(SIZE, matr_1, matr_2, matr_res);
-        auto end = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-        print_matrix(SIZE, matr_res);
-        std::cerr << "Matrices "
-                  << SIZE << "X" << SIZE
-                  << " multiplied simple way"
-                  << ", success: " << std::boolalpha << cmp_matrix(SIZE, matr_ref, matr_res)
-                  << ", time: " << duration.count() / 1000000 << "." << std::setfill('0') << std::setw(6) << duration.count() % 1000000 << " seconds"
-                  << std::endl;
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            tmp_L[i][j] = A[i][j] + A[i + size / 2][j + size / 2];
+            tmp_R[i][j] = B[i][j] + B[i + size / 2][j + size / 2];
+        }
+    }
+    matrix_multiply_stras(size / 2, tmp_L, tmp_R, tmp);
+
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < size / 2; i++)
+    {
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            matr_res[i][j] = tmp[i][j];
+            matr_res[i + size / 2][j + size / 2] = tmp[i][j];
+        }
     }
 
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < size / 2; i++)
     {
-        auto start = std::chrono::high_resolution_clock::now();
-        matrix_multiply_stras(SIZE, matr_1, matr_2, matr_res);
-        auto end = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-        print_matrix(SIZE, matr_res);
-        std::cerr << "Matrices "
-                  << SIZE << "X" << SIZE
-                  << " multiplied using Strassen algorithm"
-                  << ", success: " << std::boolalpha << cmp_matrix(SIZE, matr_ref, matr_res)
-                  << ", time: " << duration.count() / 1000000 << "." << std::setfill('0') << std::setw(6) << duration.count() % 1000000 << " seconds"
-                  << std::endl;
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            tmp_L[i][j] = A[i][j + size / 2] - A[i + size / 2][j + size / 2];
+            tmp_R[i][j] = B[i + size / 2][j] + B[i + size / 2][j + size / 2];
+        }
+    }
+    matrix_multiply_stras(size / 2, tmp_L, tmp_R, tmp);
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < size / 2; i++)
+    {
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            matr_res[i][j] += tmp[i][j];
+        }
     }
 
-    free_matrix(matr_1);
-    free_matrix(matr_2);
-    free_matrix(matr_res);
-    free_matrix(matr_ref);
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < size / 2; i++)
+    {
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            tmp_L[i][j] = A[i + size / 2][j] - A[i][j];
+            tmp_R[i][j] = B[i][j] + B[i][j + size / 2];
+        }
+    }
+    matrix_multiply_stras(size / 2, tmp_L, tmp_R, tmp);
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < size / 2; i++)
+    {
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            matr_res[i + size / 2][j + size / 2] += tmp[i][j];
+        }
+    }
+
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < size / 2; i++)
+    {
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            tmp_L[i][j] = A[i][j] + A[i][j + size / 2];
+            tmp_R[i][j] = B[i + size / 2][j + size / 2];
+        }
+    }
+    matrix_multiply_stras(size / 2, tmp_L, tmp_R, tmp);
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < size / 2; i++)
+    {
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            matr_res[i][j] -= tmp[i][j];
+            matr_res[i][j + size / 2] = tmp[i][j];
+        }
+    }
+
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < size / 2; i++)
+    {
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            tmp_L[i][j] = A[i + size / 2][j] + A[i + size / 2][j + size / 2];
+            tmp_R[i][j] = B[i][j];
+        }
+    }
+    matrix_multiply_stras(size / 2, tmp_L, tmp_R, tmp);
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < size / 2; i++)
+    {
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            matr_res[i + size / 2][j] = tmp[i][j];
+            matr_res[i + size / 2][j + size / 2] -= tmp[i][j];
+        }
+    }
+
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < size / 2; i++)
+    {
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            tmp_L[i][j] = A[i + size / 2][j + size / 2];
+            tmp_R[i][j] = B[i + size / 2][j] - B[i][j];
+        }
+    }
+    matrix_multiply_stras(size / 2, tmp_L, tmp_R, tmp);
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < size / 2; i++)
+    {
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            matr_res[i][j] += tmp[i][j];
+            matr_res[i + size / 2][j] += tmp[i][j];
+        }
+    }
+
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < size / 2; i++)
+    {
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            tmp_L[i][j] = A[i][j];
+            tmp_R[i][j] = B[i][j + size / 2] - B[i + size / 2][j + size / 2];
+        }
+    }
+    matrix_multiply_stras(size / 2, tmp_L, tmp_R, tmp);
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < size / 2; i++)
+    {
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            matr_res[i][j + size / 2] += tmp[i][j];
+            matr_res[i + size / 2][j + size / 2] += tmp[i][j];
+        }
+    }
+
+    free_matrix(tmp);
+    free_matrix(tmp_L);
+    free_matrix(tmp_R);
+}
+
+void test_method(std::string name, size_t size, int **matr_1, int **matr_2, int **matr_res, int **matr_ref, std::function<void(size_t, int **, int **, int **)> test_func)
+{
+    auto start = std::chrono::high_resolution_clock::now();
+    test_func(size, matr_1, matr_2, matr_res);
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+
+    if (!cmp_matrix(size, matr_ref, matr_res))
+    {
+        std::cerr << "Wrong answer, method: " << name << ", size: " << size << std::endl;
+    }
+
+    std::cout << name << ", " << size << ", " << duration.count() / 1000000 << "." << std::setfill('0') << std::setw(6) << duration.count() % 1000000 << "\n";
+}
+
+int main()
+{
+    for (size_t size = 64; size <= 2048; size *= 2)
+    // for (size_t size = 64; size <= 512; size *= 2)
+    {
+
+        int **matr_1 = allocate_matrix(size);
+        int **matr_2 = allocate_matrix(size);
+        int **matr_res = allocate_matrix(size);
+        int **matr_ref = allocate_matrix(size);
+
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<int> dist(-100, 100);
+
+        for (size_t i = 0; i < size; i++)
+        {
+            for (size_t j = 0; j < size; j++)
+            {
+                matr_1[i][j] = dist(gen);
+                matr_2[i][j] = dist(gen);
+            }
+        }
+
+        matrix_multiply_simple(size, matr_1, matr_2, matr_ref);
+
+        test_method("simple", size, matr_1, matr_2, matr_res, matr_ref, matrix_multiply_simple);
+        test_method("transpose_opt", size, matr_1, matr_2, matr_res, matr_ref, matrix_multiply_transpose_opt);
+        for (size_t block_size = 1; block_size <= size; block_size *= 2)
+        {
+            std::function<void(size_t, int **, int **, int **)> test_func = [block_size](size_t size, int **matr_1, int **matr_2, int **matr_res)
+            { matrix_multiply_block_opt(size, block_size, matr_1, matr_2, matr_res); };
+            std::stringstream ss;
+            ss << "block_opt_" << block_size;
+            test_method(ss.str(), size, matr_1, matr_2, matr_res, matr_ref, test_func);
+        }
+        for (size_t threshold = 1; threshold <= size; threshold *= 2)
+        {
+            std::function<void(size_t, int **, int **, int **)> test_func = [threshold](size_t size, int **matr_1, int **matr_2, int **matr_res)
+            { matrix_multiply_stras(size, matr_1, matr_2, matr_res, threshold); };
+            std::stringstream ss;
+            ss << "strassen_" << threshold;
+            test_method(ss.str(), size, matr_1, matr_2, matr_res, matr_ref, test_func);
+        }
+        for (size_t threshold = 8; threshold <= size; threshold *= 2)
+        {
+            std::function<void(size_t, int **, int **, int **)> test_func = [threshold](size_t size, int **matr_1, int **matr_2, int **matr_res)
+            { matrix_multiply_stras_omp(size, matr_1, matr_2, matr_res, threshold); };
+            std::stringstream ss;
+            ss << "strassen_omp_" << threshold;
+            test_method(ss.str(), size, matr_1, matr_2, matr_res, matr_ref, test_func);
+        }
+
+        free_matrix(matr_1);
+        free_matrix(matr_2);
+        free_matrix(matr_res);
+        free_matrix(matr_ref);
+    }
 }
