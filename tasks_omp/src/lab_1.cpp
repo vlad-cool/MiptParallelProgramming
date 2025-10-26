@@ -173,14 +173,7 @@ void matrix_multiply_stras(const size_t size, int **matr_1, int **matr_2, int **
         }
     }
 
-    int **D = allocate_matrix(size / 2);
-    int **D_1 = allocate_matrix(size / 2);
-    int **D_2 = allocate_matrix(size / 2);
-    int **H_1 = allocate_matrix(size / 2);
-    int **H_2 = allocate_matrix(size / 2);
-    int **V_1 = allocate_matrix(size / 2);
-    int **V_2 = allocate_matrix(size / 2);
-
+    int **tmp = allocate_matrix(size / 2);
     int **tmp_L = allocate_matrix(size / 2);
     int **tmp_R = allocate_matrix(size / 2);
 
@@ -192,7 +185,15 @@ void matrix_multiply_stras(const size_t size, int **matr_1, int **matr_2, int **
             tmp_R[i][j] = B_1_1[i][j] + B_2_2[i][j];
         }
     }
-    matrix_multiply_stras(size / 2, tmp_L, tmp_R, D);
+    matrix_multiply_stras(size / 2, tmp_L, tmp_R, tmp);
+    for (size_t i = 0; i < size / 2; i++)
+    {
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            matr_res[i][j] = tmp[i][j];
+            matr_res[i + size / 2][j + size / 2] = tmp[i][j];
+        }
+    }
 
     for (size_t i = 0; i < size / 2; i++)
     {
@@ -202,7 +203,14 @@ void matrix_multiply_stras(const size_t size, int **matr_1, int **matr_2, int **
             tmp_R[i][j] = B_2_1[i][j] + B_2_2[i][j];
         }
     }
-    matrix_multiply_stras(size / 2, tmp_L, tmp_R, D_1);
+    matrix_multiply_stras(size / 2, tmp_L, tmp_R, tmp);
+    for (size_t i = 0; i < size / 2; i++)
+    {
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            matr_res[i][j] += tmp[i][j];
+        }
+    }
 
     for (size_t i = 0; i < size / 2; i++)
     {
@@ -212,7 +220,14 @@ void matrix_multiply_stras(const size_t size, int **matr_1, int **matr_2, int **
             tmp_R[i][j] = B_1_1[i][j] + B_1_2[i][j];
         }
     }
-    matrix_multiply_stras(size / 2, tmp_L, tmp_R, D_2);
+    matrix_multiply_stras(size / 2, tmp_L, tmp_R, tmp);
+    for (size_t i = 0; i < size / 2; i++)
+    {
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            matr_res[i + size / 2][j + size / 2] += tmp[i][j];
+        }
+    }
 
     for (size_t i = 0; i < size / 2; i++)
     {
@@ -221,7 +236,15 @@ void matrix_multiply_stras(const size_t size, int **matr_1, int **matr_2, int **
             tmp_L[i][j] = A_1_1[i][j] + A_1_2[i][j];
         }
     }
-    matrix_multiply_stras(size / 2, tmp_L, B_2_2, H_1);
+    matrix_multiply_stras(size / 2, tmp_L, B_2_2, tmp);
+    for (size_t i = 0; i < size / 2; i++)
+    {
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            matr_res[i][j] -= tmp[i][j];
+            matr_res[i][j + size / 2] = tmp[i][j];
+        }
+    }
 
     for (size_t i = 0; i < size / 2; i++)
     {
@@ -230,7 +253,15 @@ void matrix_multiply_stras(const size_t size, int **matr_1, int **matr_2, int **
             tmp_L[i][j] = A_2_1[i][j] + A_2_2[i][j];
         }
     }
-    matrix_multiply_stras(size / 2, tmp_L, B_1_1, H_2);
+    matrix_multiply_stras(size / 2, tmp_L, B_1_1, tmp);
+    for (size_t i = 0; i < size / 2; i++)
+    {
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            matr_res[i + size / 2][j] = tmp[i][j];
+            matr_res[i + size / 2][j + size / 2] -= tmp[i][j];
+        }
+    }
 
     for (size_t i = 0; i < size / 2; i++)
     {
@@ -239,7 +270,15 @@ void matrix_multiply_stras(const size_t size, int **matr_1, int **matr_2, int **
             tmp_R[i][j] = B_2_1[i][j] - B_1_1[i][j];
         }
     }
-    matrix_multiply_stras(size / 2, A_2_2, tmp_R, V_1);
+    matrix_multiply_stras(size / 2, A_2_2, tmp_R, tmp);
+    for (size_t i = 0; i < size / 2; i++)
+    {
+        for (size_t j = 0; j < size / 2; j++)
+        {
+            matr_res[i][j] += tmp[i][j];
+            matr_res[i + size / 2][j] += tmp[i][j];
+        }
+    }
 
     for (size_t i = 0; i < size / 2; i++)
     {
@@ -248,27 +287,19 @@ void matrix_multiply_stras(const size_t size, int **matr_1, int **matr_2, int **
             tmp_R[i][j] = B_1_2[i][j] - B_2_2[i][j];
         }
     }
-    matrix_multiply_stras(size / 2, A_1_1, tmp_R, V_2);
-
+    matrix_multiply_stras(size / 2, A_1_1, tmp_R, tmp);
     for (size_t i = 0; i < size / 2; i++)
     {
         for (size_t j = 0; j < size / 2; j++)
         {
-            matr_res[i][j] = D[i][j] + D_1[i][j] + V_1[i][j] - H_1[i][j];
-            matr_res[i][j + size / 2] = V_2[i][j] + H_1[i][j];
-            matr_res[i + size / 2][j] = V_1[i][j] + H_2[i][j];
-            matr_res[i + size / 2][j + size / 2] = D[i][j] + D_2[i][j] + V_2[i][j] - H_2[i][j];
+            matr_res[i][j + size / 2] += tmp[i][j];
+            matr_res[i + size / 2][j + size / 2] += tmp[i][j];
         }
     }
 
+    free_matrix(tmp);
     free_matrix(tmp_L);
     free_matrix(tmp_R);
-    free_matrix(D_1);
-    free_matrix(D_2);
-    free_matrix(H_1);
-    free_matrix(H_2);
-    free_matrix(V_1);
-    free_matrix(V_2);
 }
 
 int main()
