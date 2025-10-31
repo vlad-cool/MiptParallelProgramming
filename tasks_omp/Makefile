@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -O3 -fopenmp -lomp -Wextra -Werror=return-type
+CXXFLAGS = -Wall -O3 -fopenmp -lomp -Wextra -Werror=return-type -std=c++23
 
 SOURCES = $(wildcard src/*.cpp)
 TARGETS = $(addprefix bin/, $(SOURCES:src/%.cpp=%))

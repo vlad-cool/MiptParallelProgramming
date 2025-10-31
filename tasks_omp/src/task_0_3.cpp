@@ -17,6 +17,6 @@ int main()
         var += 1;
         var *= 2;
         std::cout << num_thread << " " << var << std::endl;
-        active++;
+        active += 1;
     }
 }
