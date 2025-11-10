@@ -1,4 +1,5 @@
 CXX = g++
+# CXXFLAGS = -Wall -g -fopenmp -lomp -Wextra -Werror=return-type -std=c++23
 CXXFLAGS = -Wall -O3 -fopenmp -lomp -Wextra -Werror=return-type -std=c++23
 
 SOURCES = $(wildcard src/*.cpp)

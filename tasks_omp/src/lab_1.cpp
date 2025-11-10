@@ -807,8 +807,10 @@ int main()
             test_method(ss.str(), size, matr_1, matr_2, matr_res, matr_ref, test_func);
         }
         for (size_t threshold = 8; threshold <= size; threshold *= 2)
+        // for (size_t threshold = 1; threshold * 8 <= size; threshold *= 2)
         {
             std::function<void(size_t, int **, int **, int **)> test_func = [threshold](size_t size, int **matr_1, int **matr_2, int **matr_res)
+            // { matrix_multiply_stras_omp_simd(size, matr_1, matr_2, matr_res, size / threshold); };
             { matrix_multiply_stras_omp_simd(size, matr_1, matr_2, matr_res, threshold); };
             std::stringstream ss;
             ss << "strassen_omp_simd_" << threshold;
