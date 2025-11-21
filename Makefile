@@ -9,6 +9,7 @@ TARGETS = $(SOURCES:.c=)
 all: $(TARGETS) $(OPENMP_TARGETS)
 	cd tasks_omp && make
 	cd tasks_omp_devices && make
+	cd lab_2 && make
 
 %: %.c $(COMMON)
 	$(CXX) $(CXXFLAGS) -o $@ $<
@@ -20,3 +21,4 @@ clean:
 	rm -f $(TARGETS) $(OPENMP_TARGETS)
 	cd tasks_omp && make clean
 	cd tasks_omp_devices && make clean
+	cd lab_2 && make clean
