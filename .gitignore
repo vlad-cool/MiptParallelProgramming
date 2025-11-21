@@ -11,13 +11,5 @@ tasks_mpi/lab_1/bin/
 tasks_mpi/lab_2/bin/
 tasks_omp/bin/*
 tasks_omp_devices/bin/*
-lab_2/bin/main_base
-lab_2/bin/main_mpi
-lab_2/bin/main_omp
-lab_2/bin/task_1_base
-lab_2/bin/task_1_mpi
-lab_2/data/main_base
-lab_2/data/main_mpi
-lab_2/data/main_omp
-lab_2/data/task_1_base
-lab_2/data/task_1_mpi
+lab_2/bin/*
+lab_2/data/*
