@@ -33,33 +33,34 @@ void main_loop(int i, double **a, int sub_size, int sub_rank, int main_rank)
         {
             int start_1, end_1;
 
-            for (int j = 1; j < sub_size - 1; j++)
+            for (int j = 1; j < sub_size; j++)
             {
-                start_1 = ((JSIZE - 3) / sub_size) * j;
-                end_1 = ((JSIZE - 3) / sub_size) * (j + 1);
+                if (j + 1 < sub_size)
+                {
+                    start_1 = ((JSIZE - 3) / sub_size) * j;
+                    end_1 = ((JSIZE - 3) / sub_size) * (j + 1);
+                }
+                else
+                {
+                    start_1 = ((JSIZE - 3) / sub_size) * (sub_size - 1);
+                    end_1 = JSIZE - 3;
+                }
 
                 MPI_Recv(a[i] + start_1, end_1 - start_1, MPI_DOUBLE, j * 2 + main_rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            }
-
-            start_1 = ((JSIZE - 3) / sub_size) * (sub_size - 1);
-            end_1 = JSIZE - 3;
-
-            MPI_Recv(a[i] + start_1, end_1 - start_1, MPI_DOUBLE, (sub_size - 1) * 2 + main_rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-            for (int j = 1; j < sub_size - 1; j++)
-            {
-                end_1 = ((JSIZE - 3) / sub_size) * (j + 1);
-                MPI_Send(a[i] + end_1, 3, MPI_DOUBLE, j * 2 + main_rank, 0, MPI_COMM_WORLD);
             }
         }
         else
         {
             MPI_Send(a[i] + start, end - start, MPI_DOUBLE, main_rank, 0, MPI_COMM_WORLD);
+        }
 
-            if (sub_rank + 1 != sub_size)
-            {
-                MPI_Recv(a[i] + end, 3, MPI_DOUBLE, main_rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            }
+        if (sub_rank != 0)
+        {
+            MPI_Send(a[i] + start, 3, MPI_DOUBLE, sub_rank * 2 + main_rank - 2, 0, MPI_COMM_WORLD);
+        }
+        if (sub_rank + 1 != sub_size)
+        {
+            MPI_Recv(a[i] + end, 3, MPI_DOUBLE, sub_rank * 2 + main_rank + 2, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
     }
 }

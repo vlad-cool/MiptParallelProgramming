@@ -2,12 +2,17 @@
 #include <fstream>
 #include <chrono>
 #include <cmath>
+#include <omp.h>
 
 #define ISIZE 5000
 #define JSIZE 5000
 
 int main(int argc, char **argv)
 {
+    if (argc > 2) {
+        omp_set_num_threads(std::stoi(argv[2]));
+    }
+    
     double **a = new double *[ISIZE];
     double **b = new double *[ISIZE];
 

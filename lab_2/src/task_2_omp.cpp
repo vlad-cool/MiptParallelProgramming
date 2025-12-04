@@ -20,6 +20,10 @@ void some_loop(int j_0, double **a)
 
 int main(int argc, char **argv)
 {
+    if (argc > 2) {
+        omp_set_num_threads(std::stoi(argv[2]));
+    }
+    
     double **a = new double *[ISIZE];
     a[0] = new double[ISIZE * JSIZE];
 
@@ -41,57 +45,13 @@ int main(int argc, char **argv)
     }
 
     auto start = std::chrono::high_resolution_clock::now();
-#pragma omp parallel sections
+
+#pragma omp parallel for
+    for (int k = 6; k < 12; k++)
     {
-#pragma omp section
-        some_loop(6, a);
-#pragma omp section
-        some_loop(7, a);
-#pragma omp section
-        some_loop(8, a);
-#pragma omp section
-        some_loop(9, a);
-#pragma omp section
-        some_loop(10, a);
-#pragma omp section
-        some_loop(11, a);
+        some_loop(k, a);
     }
-    //     for (i = 0; i < ISIZE - 1; i++)
-    //     {
-    // #pragma omp parallel sections
-    //         {
-    // #pragma omp section
-    //             for (j = 6; j < JSIZE; j += 6)
-    //             {
-    //                 a[i][j] = sin(0.2 * a[i + 1][j - 6]);
-    //             }
-    // #pragma omp section
-    //             for (j = 7; j < JSIZE; j += 6)
-    //             {
-    //                 a[i][j] = sin(0.2 * a[i + 1][j - 6]);
-    //             }
-    // #pragma omp section
-    //             for (j = 8; j < JSIZE; j += 6)
-    //             {
-    //                 a[i][j] = sin(0.2 * a[i + 1][j - 6]);
-    //             }
-    // #pragma omp section
-    //             for (j = 9; j < JSIZE; j += 6)
-    //             {
-    //                 a[i][j] = sin(0.2 * a[i + 1][j - 6]);
-    //             }
-    // #pragma omp section
-    //             for (j = 10; j < JSIZE; j += 6)
-    //             {
-    //                 a[i][j] = sin(0.2 * a[i + 1][j - 6]);
-    //             }
-    // #pragma omp section
-    //             for (j = 11; j < JSIZE; j += 6)
-    //             {
-    //                 a[i][j] = sin(0.2 * a[i + 1][j - 6]);
-    //             }
-    //         }
-    //     }
+
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     std::cout << duration.count() / 1000000 << "." << std::setfill('0') << std::setw(6) << duration.count() % 1000000 << std::endl;
