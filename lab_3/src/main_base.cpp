@@ -1,12 +1,21 @@
 #include <iostream>
-#include <assert.h>
-#include <omp.h>
+#include <cmath>
 
 double a;
 
-double f(double x, double y)
+double f(double y)
 {
     return a * (y - y * y * y);
+}
+
+double df(double y)
+{
+    return a * (1 - 3 * y * y);
+}
+
+double F(double y_0, double y_1, double y_2, double h)
+{
+    return (f(y_0) + 10 * f(y_1) + f(y_2)) / 12 - (y_0 - 2 * y_1 + y_2) / (h * h);
 }
 
 double get_element(double *a, ssize_t i, ssize_t size)
@@ -61,13 +70,8 @@ void solve_tridiag(double *diag_0, double *diag_1, double *diag_2, double *b, do
 
 void solve_reduction(double *diag_0, double *diag_1, double *diag_2, double *rhs, double *res, ssize_t size, ssize_t height)
 {
-#pragma omp critical
-    {
-        std::cout << "+ " << height << std::endl;
-    }
     if (height == 0 || size <= 2)
     {
-        // #pragma omp task
         solve_tridiag(diag_0, diag_1, diag_2, rhs, res, size);
         return;
     }
@@ -229,65 +233,110 @@ void solve_reduction(double *diag_0, double *diag_1, double *diag_2, double *rhs
     delete[] diag_1_2;
     delete[] rhs_1;
     delete[] res_1;
-
-#pragma omp critical
-    {
-        std::cout << "- " << height << std::endl;
-    }
 }
 
 int main(int argc, char *argv[])
 {
-    std::cout << omp_get_num_procs() << std::endl;
-    ssize_t N = 400000;
+    if (argc != 3)
+    {
+        std::cout << "Usage: " << argv[0] << " a h" << std::endl;
+        return 1;
+    }
+
+    double h;
+    double eps = 1e-7;
+
+    a = std::stod(argv[1]);
+    h = std::stod(argv[2]);
+
+    ssize_t N = static_cast<ssize_t>(std::ceil(20 / h));
 
     double *diag_0 = new double[N - 1];
     double *diag_1 = new double[N];
     double *diag_2 = new double[N - 1];
+    double *rhs = new double[N];
+    double *y = new double[N];
 
-    double *b_0 = new double[N];
-    double *b = new double[N];
     double *res = new double[N];
 
-#pragma omp parallel for collapse(2)
     for (ssize_t i = 0; i < N; i++)
     {
-        for (ssize_t j = 0; j < N; j++)
+        // y[i] = sqrt(2);
+        y[i] = 0;
+    }
+
+    double max = eps * 2;
+
+    while (max > eps)
+    {
+        for (ssize_t i = 0; i < N - 1; i++)
         {
-            if (i == j)
-            {
-                diag_1[i] = 2 * i + 10;
-            }
-            else if (i + 1 == j)
-            {
-                diag_2[i] = 1 / (static_cast<double>(i) + 2);
-            }
-            else if (j + 1 == i)
-            {
-                diag_0[j] = 4 / (static_cast<double>(i) + 2);
-            }
+            diag_0[i] = df(y[i]) / 12 - 1 / (h * h);
         }
-        b[i] = i + 2;
+        for (ssize_t i = 0; i < N; i++)
+        {
+            diag_1[i] = 10 * df(y[i]) / 12 + 2 / (h * h);
+        }
+        for (ssize_t i = 0; i < N; i++)
+        {
+            diag_2[i] = df(y[i + 1]) / 12 - 1 / (h * h);
+        }
+        for (ssize_t i = 1; i < N - 2; i++)
+        {
+            rhs[i] = -F(y[i - 1], y[i], y[i + 1], h);
+        }
+        rhs[0] = -F(sqrt(2), y[0], y[1], h);
+        rhs[N - 1] = -F(y[N - 2], y[N - 1 ], sqrt(2), h);
+
+        // for (ssize_t i = 1; i < N - 2; i++) {
+        //     diag_0[i] = 1;
+        //     diag_2[i] = 1;
+        // }
+        // for (ssize_t i = 1; i < N - 1; i++) {
+        //     diag_1[i] = -2;
+        //     rhs[i] = h * h * f(y[i]) + h * h / 12 * (f(y[i - 1]) - 2 * f(y[i]) + f(y[i + 1]));
+        // }
+
+        // diag_0[0] = 0;
+        // diag_1[0] = 1;
+        // diag_2[0] = 0;
+        // diag_0[N - 2] = 0;
+        // diag_1[N - 1] = 1;
+        // diag_2[N - 2] = 0;
+        // rhs[0] = 0;
+        // rhs[N - 1] = 0;
+
+        for (ssize_t i = 0; i < N; i++)
+        {
+            std::cerr << rhs[i] << " ";
+        }
+        std::cerr << std::endl;
+
+        solve_reduction(diag_0, diag_1, diag_2, rhs, res, N, 4);
+
+        for (ssize_t i = 0; i < N; i++)
+        {
+            std::cerr << res[i] << " ";
+        }
+        std::cerr << std::endl;
+
+        for (ssize_t i = 1; i < N - 1; i++)
+        {
+            y[i] += res[i];
+        }
+
+        max = std::abs(res[0]);
+        for (ssize_t i = 0; i < N; i++)
+        {
+            max = std::max(max, std::abs(res[i]));
+        }
     }
 
-#pragma omp parallel for
     for (ssize_t i = 0; i < N; i++)
     {
-        b_0[i] = b[i];
+        std::cout << y[i] << " ";
     }
+    std::cout << std::endl;
 
-    solve_reduction(diag_0, diag_1, diag_2, b, res, N, 4);
-
-    for (ssize_t i = 0; i < N; i++)
-    {
-        double tmp = 0;
-
-        tmp += get_element(res, i - 1, N) * get_element(diag_0, i - 1, N - 1);
-        tmp += get_element(res, i, N) * get_element(diag_1, i, N);
-        tmp += get_element(res, i + 1, N) * get_element(diag_2, i, N - 1);
-
-        tmp -= b_0[i];
-
-        assert(tmp < 1e-10);
-    }
+    // solve_reduction(diag_0, diag_1, diag_2, b, res, N, 4);
 }
