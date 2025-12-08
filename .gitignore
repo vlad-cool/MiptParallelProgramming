@@ -13,3 +13,5 @@ tasks_omp/bin/*
 tasks_omp_devices/bin/*
 lab_2/bin/*
 lab_2/data/*
+lab_3/bin/*
+lab_3/data/*

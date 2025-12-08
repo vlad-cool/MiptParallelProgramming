@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <chrono>
 
 double get_element(double *a, ssize_t i, ssize_t size)
 {
@@ -80,7 +81,7 @@ void solve_reduction(double *diag_0, double *diag_1, double *diag_2, double *rhs
 
 #pragma omp parallel
     {
-#pragma omp for nowait
+#pragma omp for
         for (ssize_t j = 0; j < size_0; j++)
         {
             double a, b, c, d, e, f, g, h, i, x, y, z, u, v, w, q;
@@ -189,11 +190,8 @@ void solve_reduction(double *diag_0, double *diag_1, double *diag_2, double *rhs
 #pragma omp task
         solve_reduction(diag_1_0, diag_1_1, diag_1_2, rhs_1, res_1, size_1, height - 1);
 #pragma omp taskwait
-    }
 
-#pragma omp parallel
-    {
-#pragma omp for nowait
+#pragma omp for
         for (ssize_t i = 0; i < size; i += 2)
         {
             res[i] = res_0[i / 2];
@@ -251,6 +249,7 @@ int main(int argc, char *argv[])
 
     ssize_t N = static_cast<ssize_t>(std::ceil(20 / h));
 
+    auto start = std::chrono::high_resolution_clock::now();
     double *diag_0 = new double[N - 1];
     double *diag_1 = new double[N];
     double *diag_2 = new double[N - 1];
@@ -268,39 +267,52 @@ int main(int argc, char *argv[])
 
     while (max > eps)
     {
-        for (ssize_t i = 0; i < N - 1; i++)
+#pragma omp parallel
         {
-            diag_0[i] = df(y[i]) / 12 - 1 / (h * h);
+#pragma omp for
+            for (ssize_t i = 0; i < N - 1; i++)
+            {
+                diag_0[i] = df(y[i]) / 12 - 1 / (h * h);
+            }
+#pragma omp for
+            for (ssize_t i = 0; i < N; i++)
+            {
+                diag_1[i] = 10 * df(y[i]) / 12 + 2 / (h * h);
+            }
+#pragma omp for
+            for (ssize_t i = 0; i < N - 1; i++)
+            {
+                diag_2[i] = df(y[i + 1]) / 12 - 1 / (h * h);
+            }
+#pragma omp for
+            for (ssize_t i = 1; i < N - 1; i++)
+            {
+                rhs[i] = -F(y[i - 1], y[i], y[i + 1], h);
+            }
         }
-        for (ssize_t i = 0; i < N; i++)
-        {
-            diag_1[i] = 10 * df(y[i]) / 12 + 2 / (h * h);
-        }
-        for (ssize_t i = 0; i < N - 1; i++)
-        {
-            diag_2[i] = df(y[i + 1]) / 12 - 1 / (h * h);
-        }
-        for (ssize_t i = 1; i < N - 1; i++)
-        {
-            rhs[i] = -F(y[i - 1], y[i], y[i + 1], h);
-        }
+
         rhs[0] = -F(sqrt(2), y[0], y[1], h);
         rhs[N - 1] = -F(y[N - 2], y[N - 1], sqrt(2), h);
 
-        // solve_reduction(diag_0, diag_1, diag_2, rhs, res, N, 4);
-        solve_tridiag(diag_0, diag_1, diag_2, rhs, res, N);
+        solve_reduction(diag_0, diag_1, diag_2, rhs, res, N, 1);
 
+#pragma omp parallel for
         for (ssize_t i = 0; i < N; i++)
         {
             y[i] += res[i];
         }
 
         max = std::abs(res[0]);
+
         for (ssize_t i = 1; i < N; i++)
         {
             max = std::max(max, std::abs(res[i]));
         }
     }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    std::cout << duration.count() / 1000000 << "." << std::setfill('0') << std::setw(6) << duration.count() % 1000000 << std::endl;
 
     std::cerr << -10 << ", " << sqrt(2) << "\n";
     for (ssize_t i = 0; i < N; i++)
